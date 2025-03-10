@@ -70,6 +70,7 @@ opentelemetry-proto==1.29.0
 opentelemetry-sdk==1.29.0
 opentelemetry-semantic-conventions==0.50b0
 opentelemetry-util-http==0.50b0
+openai
 orjson==3.10.12
 overrides==7.7.0
 packaging==24.2
