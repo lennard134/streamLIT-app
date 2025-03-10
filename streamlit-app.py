@@ -90,12 +90,12 @@ if st.button("Close and Evaluate"):
     # evaluate_chat()
     # st.session_state.messages = []  # Clear chat after closing
     # st.rerun()
+# A murder has been committed in the quiet neighborhood of Riverview Close. Giles Kenworthy has been found dead—killed by a crossbow bolt to the neck. His death seems suspicious, but the case is far from simple. Some say it was a crime of passion, others believe it was carefully orchestrated. The question is: who killed him and why?
+# Your job is to investigate the case, uncover clues, and piece together the truth. But be careful—not everything is as it seems.
+# What we know so far is that the Victim is Giles Kenworthy and he was killed with a crossbow shot to the neck!
+# Can you uncover what happened, be as clear as possible when asking the questions? Good luck! 
 
-
-st.write("""A murder has been committed in the quiet neighborhood of Riverview Close. Giles Kenworthy has been found dead—killed by a crossbow bolt to the neck. His death seems suspicious, but the case is far from simple. Some say it was a crime of passion, others believe it was carefully orchestrated. The question is: who killed him and why?
-Your job is to investigate the case, uncover clues, and piece together the truth. But be careful—not everything is as it seems.
-What we know so far is that the Victim is Giles Kenworthy and he was killed with a crossbow shot to the neck!
-Can you uncover what happened, be as clear as possible when asking the questions? Good luck! """)
+st.write("""Chat hier met een document van CBS de Citer, wil jij weten wat de vrijwillige ouderbijdrage is, vraag het gerust!""")
 
 # User Input
 token = st.secrets["TOGETHER_API_TOKEN"]
@@ -134,11 +134,11 @@ if user_message:
         print(f'Last message: {last_message}')
     else:
         last_message = ''
-
+                    # You are assisting a detective in solving a murder commited on Giles Kenworthy. 
+                    # You have access to a document that contains all the detail.
+                    # The detective wants to know who committed the murder and what the motive was.
     custom_prompt = f"""
-                    You are assisting a detective in solving a murder commited on Giles Kenworthy. 
-                    You have access to a document that contains all the detail.
-                    The detective wants to know who committed the murder and what the motive was.
+                    You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
                     Your role is to:
                     1. Answer questions by the user using the provided retrieved documents.
                     2. Never generate information beyond what is retrieved from the document.
