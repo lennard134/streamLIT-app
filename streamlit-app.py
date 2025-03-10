@@ -73,7 +73,7 @@ if not EMBEDDED:
     data_string = pdf_to_text(pdf_path=pdf_path)
     ## Chunks is list of strings
     chunks = split_into_chunks(data_string, chunk_size=chunk_size)
-
+    embeddings = model.encode(chunks)
     EMBEDDED = True
 
 # Initialize chat history in Streamlit session state
@@ -115,8 +115,6 @@ llm_response = ''
 if user_message:
     # Append user message to chat history
 
-    embeddings = model.encode(chunks)
-
     question_embedded = model.encode(user_message)
     similarities = model.similarity(embeddings, question_embedded)
     # Flatten the tensor (if it's a column vector)
@@ -128,10 +126,8 @@ if user_message:
     for idx in top5_indices:
         retrieved_context += chunks[idx]
     print(retrieved_context)
-    exit(0)
-    # retrieved_docs = retriever.get_relevant_documents(user_message)
-    # retrieved_context = "\n\n".join([doc.page_content for doc in retrieved_docs])
-    # st.session_state.messages.append({"role": "user", "content": user_message})
+
+    st.session_state.messages.append({"role": "user", "content": user_message})
     
     if "messages" in st.session_state:  
         last_message = st.session_state.messages[-1]
