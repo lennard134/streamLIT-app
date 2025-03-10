@@ -68,7 +68,7 @@ if not EMBEDDED:
     embed_name = 'all-MiniLM-L6-v2' 
     # model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
     model = SentenceTransformer(embed_name)
-    pdf_path = '../Data/content/Horowitz.pdf'
+    pdf_path = 'schoolgids.pdf'
     chunk_size = 1024
     data_string = pdf_to_text(pdf_path=pdf_path)
     ## Chunks is list of strings
