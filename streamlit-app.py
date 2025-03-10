@@ -98,6 +98,7 @@ What we know so far is that the Victim is Giles Kenworthy and he was killed with
 Can you uncover what happened, be as clear as possible when asking the questions? Good luck! """)
 
 # User Input
+token = st.secrets["TOGETHER_API_TOKEN"]
 client = Together()
 
 
