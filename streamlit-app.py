@@ -100,7 +100,7 @@ Can you uncover what happened, be as clear as possible when asking the questions
 # User Input
 token = st.secrets["TOGETHER_API_TOKEN"]
 client = openai.OpenAI(
-  api_key=os.environ.get(token),
+  api_key=token,
   base_url="https://api.together.xyz/v1",
 )
 
