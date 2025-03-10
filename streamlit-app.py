@@ -3,8 +3,6 @@ from together import Together
 from langchain_community.document_loaders import PyMuPDFLoader
 import pymupdf
 from langchain.text_splitter import CharacterTextSplitter
-from langchain_chroma import Chroma
-from langchain_ollama import OllamaEmbeddings
 import re
 from sentence_transformers import SentenceTransformer
 
