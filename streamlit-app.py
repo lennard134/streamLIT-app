@@ -7,6 +7,11 @@ import re
 from sentence_transformers import SentenceTransformer
 import openai
 import torch
+from supabase import create_client, Client
+
+import hashlib
+import time
+import random
 
 def pdf_to_text(pdf_path):
     """Extracts text from a PDF and returns it as a single long string."""
@@ -49,7 +54,6 @@ def evaluate_chat():
     num_interactions = len(st.session_state.messages) // 2  # Assuming user-bot pairs
     st.write(f"Total interactions: {num_interactions}")
 
-
 EMBEDDED = False
 
 #embed documents
@@ -74,6 +78,8 @@ if not EMBEDDED:
     ## Chunks is list of strings
     chunks = split_into_chunks(data_string, chunk_size=chunk_size)
     embeddings = model.encode(chunks)
+    session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
+    session_id = hashlib.sha256(session_data).hexdigest()[:16]
     EMBEDDED = True
 
 # Initialize chat history in Streamlit session state
@@ -99,10 +105,14 @@ st.write("""Chat hier met een document van CBS de Citer, wil jij weten wat de vr
 
 # User Input
 token = st.secrets["TOGETHER_API_TOKEN"]
+url = st.secrets["SUPABASE_URL"]
+key = st.secrets["SUPABASE_KEY"]
+
 client = openai.OpenAI(
   api_key=token,
   base_url="https://api.together.xyz/v1",
 )
+supabase_client: Client = create_client(url, key)
 
 
 # Display Chat History
@@ -158,6 +168,11 @@ if user_message:
 
     llm_response =result.choices[0].message.content
     # Append LLM response to chat history
+    response = (
+        supabase_client.table("testEnvironment")
+        .insert({"session_id": session_id, "Question": user_message, "Answer": llm_response})
+        .execute()  
+    )
     st.session_state.messages.append({"role": "assistant", "content": llm_response})
 
     # Clear user input
