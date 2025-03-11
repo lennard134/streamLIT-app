@@ -88,7 +88,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # Title & Intro
-st.title("Chat with LLM 🤖")
+st.title("Chat with your assistant 🤖")
 # Close and Evaluate Button
 if st.button("Close and Evaluate"):
     pass
