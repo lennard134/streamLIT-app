@@ -59,26 +59,27 @@ def evaluate_chat():
 if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
     st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
-    
-# chunk_size = 512
-# embedding = "nomic-embed-text"
-# file_path = '../Data/content/Horowitz.pdf'
-# docs = document_parsing(file_path, chunk_size=chunk_size)
-# local_embeddings = OllamaEmbeddings(model=embedding)
-# text_splitter = CharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size/10)
-# texts = text_splitter.split_documents(docs)
-# vectorstore = Chroma.from_documents(documents=texts, embedding=local_embeddings)
-# retriever = vectorstore.as_retriever(search_kwargs={'k': 4})
-# print(type(retriever))
-embed_name = 'all-MiniLM-L6-v2' 
-# model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
-model = SentenceTransformer(embed_name)
-pdf_path = 'schoolgids.pdf'
-chunk_size = 1024
-data_string = pdf_to_text(pdf_path=pdf_path)
-## Chunks is list of strings
-chunks = split_into_chunks(data_string, chunk_size=chunk_size)
-embeddings = model.encode(chunks)
+if 'embeddings' not in st.session_state:  
+    # chunk_size = 512
+    # embedding = "nomic-embed-text"
+    # file_path = '../Data/content/Horowitz.pdf'
+    # docs = document_parsing(file_path, chunk_size=chunk_size)
+    # local_embeddings = OllamaEmbeddings(model=embedding)
+    # text_splitter = CharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size/10)
+    # texts = text_splitter.split_documents(docs)
+    # vectorstore = Chroma.from_documents(documents=texts, embedding=local_embeddings)
+    # retriever = vectorstore.as_retriever(search_kwargs={'k': 4})
+    # print(type(retriever))
+    embed_name = 'all-MiniLM-L6-v2' 
+    # model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
+    model = SentenceTransformer(embed_name)
+    pdf_path = 'schoolgids.pdf'
+    chunk_size = 1024
+    data_string = pdf_to_text(pdf_path=pdf_path)
+    ## Chunks is list of strings
+    chunks = split_into_chunks(data_string, chunk_size=chunk_size)
+    embeddings = model.encode(chunks)
+    st.session_state['embeddings'] = embeddings
 
 # Initialize chat history in Streamlit session state
 if "messages" not in st.session_state:
