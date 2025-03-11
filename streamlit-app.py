@@ -80,6 +80,7 @@ if 'embeddings' not in st.session_state:
     chunks = split_into_chunks(data_string, chunk_size=chunk_size)
     embeddings = model.encode(chunks)
     st.session_state['embeddings'] = embeddings
+    st.session_state['model'] = model
 
 # Initialize chat history in Streamlit session state
 if "messages" not in st.session_state:
@@ -124,8 +125,8 @@ llm_response = ''
 if user_message:
     # Append user message to chat history
 
-    question_embedded = model.encode(user_message)
-    similarities = model.similarity(st.session_state.embeddings, question_embedded)
+    question_embedded = st.session_state.model.encode(user_message)
+    similarities = st.session_state.model.similarity(st.session_state.embeddings, question_embedded)
     # Flatten the tensor (if it's a column vector)
     tensor_values = similarities.view(-1)
 
@@ -167,10 +168,9 @@ if user_message:
 
     llm_response =result.choices[0].message.content
     # Append LLM response to chat history
-    session_id = st.session_state.session_id
     response = (
         supabase_client.table("testEnvironment")
-        .insert({"session_id": session_id, "Question": user_message, "Answer": llm_response})
+        .insert({"session_id": st.session_state.session_id, "Question": user_message, "Answer": llm_response})
         .execute()  
     )
     st.session_state.messages.append({"role": "assistant", "content": llm_response})
