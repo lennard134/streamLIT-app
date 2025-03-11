@@ -58,8 +58,7 @@ def evaluate_chat():
 # Initialization
 if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
-    session_id = hashlib.sha256(session_data).hexdigest()[:16]
-    st.session_state['session_id'] = 'value'
+    st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
     
 # chunk_size = 512
 # embedding = "nomic-embed-text"
