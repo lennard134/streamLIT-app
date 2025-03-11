@@ -169,7 +169,7 @@ if user_message:
     # Append LLM response to chat history
     response = (
         supabase_client.table("testEnvironment")
-        .insert({"session_id": session_id, "Question": user_message, "Answer": llm_response})
+        .insert({"session_id": st.write(st.session_state.session_id), "Question": user_message, "Answer": llm_response})
         .execute()  
     )
     st.session_state.messages.append({"role": "assistant", "content": llm_response})
