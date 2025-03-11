@@ -167,9 +167,10 @@ if user_message:
 
     llm_response =result.choices[0].message.content
     # Append LLM response to chat history
+    session_id = st.write(st.session_state.session_id)
     response = (
         supabase_client.table("testEnvironment")
-        .insert({"session_id": st.write(st.session_state.session_id), "Question": user_message, "Answer": llm_response})
+        .insert({"session_id": session_id, "Question": user_message, "Answer": llm_response})
         .execute()  
     )
     st.session_state.messages.append({"role": "assistant", "content": llm_response})
