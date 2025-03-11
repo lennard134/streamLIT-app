@@ -56,7 +56,7 @@ def evaluate_chat():
 
 #embed documents
 
-if session_id in locals() or session_id in globals():
+if 'session_id' in locals() or 'session_id' in globals():
     # chunk_size = 512
     # embedding = "nomic-embed-text"
     # file_path = '../Data/content/Horowitz.pdf'
