@@ -125,7 +125,7 @@ if user_message:
     # Append user message to chat history
 
     question_embedded = model.encode(user_message)
-    similarities = model.similarity(embeddings, question_embedded)
+    similarities = model.similarity(st.session_state.embeddings, question_embedded)
     # Flatten the tensor (if it's a column vector)
     tensor_values = similarities.view(-1)
 
