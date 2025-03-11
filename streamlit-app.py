@@ -54,11 +54,9 @@ def evaluate_chat():
     num_interactions = len(st.session_state.messages) // 2  # Assuming user-bot pairs
     st.write(f"Total interactions: {num_interactions}")
 
-EMBEDDED = False
-
 #embed documents
 
-if not EMBEDDED:
+if session_id in locals() or session_id in globals():
     # chunk_size = 512
     # embedding = "nomic-embed-text"
     # file_path = '../Data/content/Horowitz.pdf'
@@ -80,7 +78,6 @@ if not EMBEDDED:
     embeddings = model.encode(chunks)
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
     session_id = hashlib.sha256(session_data).hexdigest()[:16]
-    EMBEDDED = True
 
 # Initialize chat history in Streamlit session state
 if "messages" not in st.session_state:
