@@ -81,6 +81,7 @@ if 'embeddings' not in st.session_state:
     embeddings = model.encode(chunks)
     st.session_state['embeddings'] = embeddings
     st.session_state['model'] = model
+    st.session_state['chunks'] = chunks
 
 # Initialize chat history in Streamlit session state
 if "messages" not in st.session_state:
@@ -134,7 +135,7 @@ if user_message:
     top5_values, top5_indices = torch.topk(tensor_values, k=5)
     retrieved_context = ''
     for idx in top5_indices:
-        retrieved_context += chunks[idx]
+        retrieved_context += st.session_state.chunks[idx]
     print(retrieved_context)
 
     st.session_state.messages.append({"role": "user", "content": user_message})
