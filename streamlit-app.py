@@ -158,7 +158,7 @@ with col1:
                 )
 
         llm_response =result.choices[0].message.content
-        Append LLM response to chat history
+        # Append LLM response to chat history
         response = (
             supabase_client.table("testEnvironment")
             .insert({"session_id": st.session_state.session_id, "Question": user_message, "Answer": llm_response})
