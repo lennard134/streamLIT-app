@@ -1,4 +1,3 @@
-import pdfplumber
 import pymupdf
 import re
 import openai
