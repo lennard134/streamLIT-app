@@ -72,9 +72,9 @@ if 'session_id' not in st.session_state:
     st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
 
 if 'embeddings' not in st.session_state:  
-    embed_name = 'nomic-ai/nomic-embed-text-v2-moe' 
+    embed_name = "nomic-ai/nomic-embed-text-v2-moe"
     # model = SentenceTransformer(embed_name, trust_remote_code=True)
-    model = SentenceTransformer("nomic-ai/nomic-embed-text-v2-moe", trust_remote_code=True)
+    model = SentenceTransformer(embed_name, trust_remote_code=True)
 
     pdf_path = 'schoolgids.pdf'
     chunk_size = 512
