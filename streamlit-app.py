@@ -1,4 +1,3 @@
-import pymupdf
 import re
 import openai
 import hashlib
@@ -11,6 +10,8 @@ import streamlit as st
 
 from together import Together
 from langchain_community.document_loaders import PyMuPDFLoader
+import pymupdf
+
 from langchain.text_splitter import CharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 from supabase import create_client, Client
