@@ -8,7 +8,6 @@ import torch
 
 import streamlit as st
 
-from together import Together
 from langchain_community.document_loaders import PyMuPDFLoader
 import pymupdf
 
