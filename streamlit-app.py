@@ -105,9 +105,31 @@ with col1:
         st.session_state["messages"] = []
 
     # Display previous messages
-    for message in st.session_state["messages"]:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    st.markdown(
+        """
+        <style>
+        .scrollable-container {
+            height: 750px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 1rem;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Create a scrollable container
+    with st.container():
+        st.markdown('<div class="scrollable-container">', unsafe_allow_html=True)
+    
+        for message in st.session_state["messages"]:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+    
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # User Input
     user_message = st.chat_input("Ask your question here")
@@ -131,7 +153,6 @@ with col1:
         
         if "messages" in st.session_state:  
             last_message = st.session_state.messages[-1]
-            print(f'Last message: {last_message}')
         else:
             last_message = ''
         custom_prompt = f"""
