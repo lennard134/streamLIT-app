@@ -172,7 +172,7 @@ with col1:
 
 with col2:
     # Opening file from file path
-    source1=st.session_state['file_path']
+    source1="https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
     pdf_reader(source1) 
 
 # with st.sidebar:
