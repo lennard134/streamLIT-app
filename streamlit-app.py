@@ -89,7 +89,7 @@ if 'embeddings' not in st.session_state:
     st.session_state['file_path'] = pdf_path
 
 with col1:
-    st.header("💬 Chat with the PDF")
+    st.header("💬 Chat with the PDFFFF")
     # User Input
     token = st.secrets["TOGETHER_API_TOKEN"]
     url = st.secrets["SUPABASE_URL"]
@@ -108,7 +108,7 @@ with col1:
     # Display previous messages
     messages_box = st.container(height=600)
     for message in st.session_state["messages"]:
-        message_box.st.chat_message(message["role"]).write(message["content"])
+        messages_box.chat_message(message["role"]).write(message["content"])
             # st.markdown(message["content"])
 
     # User Input
