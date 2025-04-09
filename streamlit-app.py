@@ -94,6 +94,7 @@ if 'embeddings' not in st.session_state:
     st.session_state['model'] = model
     st.session_state['chunks'] = chunks
     st.session_state['file_path'] = pdf_path
+    st.session_state['rawFile'] = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
 
 with col1:
     st.header("💬 Chat with the PDF")
@@ -178,10 +179,6 @@ with col1:
 
 with col2:
     # Opening file from file path
-    source1="https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
-    pdf_reader(source1) 
+    pdf_reader(st.session_state['rawFile']) 
 
-# with st.sidebar:
-#     for message in st.session_state["messages"]:
-#         with st.chat_message(message["role"]):
-#             st.markdown(message["content"])
+
