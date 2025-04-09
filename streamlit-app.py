@@ -4,7 +4,8 @@ import hashlib
 import time
 import os
 import random
-import torch
+# import torch
+# torch.classes.__path__ = []
 
 import streamlit as st
 
@@ -19,7 +20,6 @@ from streamlit_pdf_reader import pdf_reader
 # ---- Config ----
 st.set_page_config(layout="wide")
 col1, col2 = st.columns([1, 1])  # Split screen
-torch.classes.__path__ = []
 
 # ---- Set PDF File (Preloaded) ----
 
@@ -89,7 +89,7 @@ if 'embeddings' not in st.session_state:
     st.session_state['file_path'] = pdf_path
 
 with col1:
-    st.header("💬 Chat with the PDFFFF")
+    st.header("💬 Chat with the PDF")
     # User Input
     token = st.secrets["TOGETHER_API_TOKEN"]
     url = st.secrets["SUPABASE_URL"]
@@ -124,7 +124,14 @@ with col1:
         tensor_values = similarities.view(-1)
 
         # Get top 5 values and their indices
-        top5_values, top5_indices = torch.topk(tensor_values, k=10)
+        # top5_values, top5_indices = torch.topk(tensor_values, k=10)
+        top_5_indices = np.argpartition(tensor_values, -10)[-10:]
+        top_5_values = tensor_values[top_5_indices]
+        
+        # Sort them in descending order (optional, to match torch.topk behavior)
+        sorted_indices = np.argsort(-top_10_values)
+        top_5_values = top_5_values[sorted_indices]
+        top_5_indices = top_5_indices[sorted_indices]
         retrieved_context = ''
         for idx in top5_indices:
             retrieved_context += st.session_state.chunks[idx]
