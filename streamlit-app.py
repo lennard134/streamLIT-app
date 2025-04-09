@@ -74,7 +74,7 @@ if 'session_id' not in st.session_state:
     st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
 
 if 'embeddings' not in st.session_state:  
-    embed_name = "nomic-ai/nomic-embed-text-v2-moe"
+    embed_name = "sentence-transformers/all-MiniLM-L6-v2"#nomic-ai/nomic-embed-text-v2-moe"
     # model = SentenceTransformer(embed_name, trust_remote_code=True)
     model = SentenceTransformer(embed_name, trust_remote_code=True)
 
