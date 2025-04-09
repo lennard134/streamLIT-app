@@ -94,7 +94,7 @@ if 'embeddings' not in st.session_state:
     st.session_state['model'] = model
     st.session_state['chunks'] = chunks
     st.session_state['file_path'] = pdf_path
-    st.session_state['rawFile'] = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
+    st.session_state['rawFile'] = "schoolgids.pdf" #"https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
 
 with col1:
     st.header("💬 Chat with the PDF")
