@@ -1,3 +1,2 @@
 [server]
 maxMessageSize = 500
-port = 8810
