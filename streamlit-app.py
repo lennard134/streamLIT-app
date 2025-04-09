@@ -4,8 +4,8 @@ import hashlib
 import time
 import os
 import random
-# import torch
-# torch.classes.__path__ = []
+import torch
+_ = torch.__file__ 
 
 import streamlit as st
 
@@ -124,14 +124,8 @@ with col1:
         tensor_values = similarities.view(-1)
 
         # Get top 5 values and their indices
-        # top5_values, top5_indices = torch.topk(tensor_values, k=10)
-        top_5_indices = np.argpartition(tensor_values, -10)[-10:]
-        top_5_values = tensor_values[top_5_indices]
-        
-        # Sort them in descending order (optional, to match torch.topk behavior)
-        sorted_indices = np.argsort(-top_10_values)
-        top_5_values = top_5_values[sorted_indices]
-        top_5_indices = top_5_indices[sorted_indices]
+        top5_values, top5_indices = torch.topk(tensor_values, k=10)
+       
         retrieved_context = ''
         for idx in top5_indices:
             retrieved_context += st.session_state.chunks[idx]
