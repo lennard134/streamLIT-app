@@ -5,7 +5,7 @@ import time
 import os
 import random
 import torch
-
+torch.classes.__path__ = []
 import streamlit as st
 
 from langchain_community.document_loaders import PyMuPDFLoader
