@@ -89,7 +89,7 @@ if 'embeddings' not in st.session_state:
     st.session_state['file_path'] = pdf_path
 
 with col1:
-    st.header("💬 Chat with the PDF")
+    st.header("💬 Chat with the PDFFFFFF")
     # User Input
     token = st.secrets["TOGETHER_API_TOKEN"]
     url = st.secrets["SUPABASE_URL"]
