@@ -1,3 +1,4 @@
+
 import re
 import openai
 import hashlib
@@ -104,10 +105,10 @@ with col1:
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
 
+    # Display previous messages
     for message in st.session_state["messages"]:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
-
 
     # User Input
     user_message = st.chat_input("Ask your question here")
@@ -131,6 +132,7 @@ with col1:
         
         if "messages" in st.session_state:  
             last_message = st.session_state.messages[-1]
+            print(f'Last message: {last_message}')
         else:
             last_message = ''
         custom_prompt = f"""
@@ -169,5 +171,3 @@ with col2:
     # Opening file from file path
     source1=st.session_state['file_path']
     pdf_reader(source1) 
-
-
