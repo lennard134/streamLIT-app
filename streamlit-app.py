@@ -111,9 +111,6 @@ with col1:
 
     # User Input
     user_message = st.chat_input("Ask your question here")
-    client = openai.OpenAI(api_key=os.environ.get("TOGETHER_API_KEY"),
-    base_url="https://api.together.xyz/v1",
-    )
     llm_response = ''
     if user_message:
 
