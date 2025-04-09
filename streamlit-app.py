@@ -178,6 +178,7 @@ with col1:
         st.rerun()
     if st.button("Next question"):
         st.session_state["messages"] = []
+        st.rerun()
         
 with col2:
     # Opening file from file path
