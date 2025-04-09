@@ -104,7 +104,6 @@ with col1:
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
 
-
     for message in st.session_state["messages"]:
         st.chat_message(message["role"]).write(message["content"])
         # with st.chat_message(message["role"]):
