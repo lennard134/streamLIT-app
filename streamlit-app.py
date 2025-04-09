@@ -4,6 +4,7 @@ import hashlib
 import time
 import os
 import random
+import requests
 
 
 import streamlit as st
@@ -65,7 +66,17 @@ def evaluate_chat():
     st.write("Evaluating session...")
     num_interactions = len(st.session_state.messages) // 2  # Assuming user-bot pairs
     st.write(f"Total interactions: {num_interactions}")
+@st.cache_data
+def download_pdf_from_dropbox(url: str) -> bytes:
+    # Convert to direct download link if needed
+    if "dropbox.com" in url and "?dl=0" in url:
+        url = url.replace("?dl=0", "?dl=1")
 
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise Exception(f"Failed to download PDF. Status code: {response.status_code}")
+    
+    return response.content  # This is bytes
 #embed documents
 # Initialization
 if 'session_id' not in st.session_state:
@@ -78,8 +89,9 @@ if 'embeddings' not in st.session_state:
     model = SentenceTransformer(embed_name, trust_remote_code=True)
 
     pdf_path = 'https://dl.dropbox.com/scl/fi/ulostrswuboxiw1m7upmx/airplaneNoImage.pdf?rlkey=siyo50w98qdbcoedhqyj0swwk&st=p2c42igz&'
+    pdf = download_pdf_from_dropbox(pdf_path)
     chunk_size = 512
-    data_string = pdf_to_text(pdf_path=pdf_path)
+    data_string = pdf_to_text(pdf_path=pdf)
     ## Chunks is list of strings
     chunks = split_into_chunks(data_string, chunk_size=chunk_size)
     embeddings = model.encode(chunks)
