@@ -176,7 +176,9 @@ with col1:
 
         # Clear user input
         st.rerun()
-
+    if st.button("Next question"):
+        st.session_state["messages"] = []
+        
 with col2:
     # Opening file from file path
     pdf_reader(st.session_state['rawFile']) 
