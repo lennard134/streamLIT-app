@@ -175,7 +175,7 @@ with col1:
         st.session_state.messages.append({"role": "assistant", "content": llm_response})
 
         # Clear user input
-        st.rerun()
+        # st.rerun()
 
 with col2:
     # Opening file from file path
