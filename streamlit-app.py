@@ -10,12 +10,12 @@ import requests
 import streamlit as st
 
 from langchain_community.document_loaders import PyMuPDFLoader
-from langchain_huggingface import HuggingFaceEmbeddings
+# from langchain_huggingface import HuggingFaceEmbeddings
 
 import pymupdf
 
 from langchain.text_splitter import CharacterTextSplitter
-# from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer
 from supabase import create_client, Client
 from streamlit_pdf_reader import pdf_reader
 
@@ -76,21 +76,21 @@ if 'session_id' not in st.session_state:
     st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
 
 if 'embeddings' not in st.session_state:  
-    # embed_name = "sentence-transformers/all-MiniLM-L6-v2"#nomic-ai/nomic-embed-text-v2-moe"
+    embed_name = "nomic-ai/nomic-embed-text-v2-moe"
     # # model = SentenceTransformer(embed_name, trust_remote_code=True)
-    # model = SentenceTransformer(embed_name, trust_remote_code=True)
-    model = HuggingFaceEmbeddings(
-        model_name="nomic-ai/nomic-embed-text-v2-moe",
-        model_kwargs={'trust_remote_code': True},
-        encode_kwargs={'normalize_embeddings': True}
-    )
+    model = SentenceTransformer(embed_name, trust_remote_code=True)
+    # model = HuggingFaceEmbeddings(
+    #     model_name="nomic-ai/nomic-embed-text-v2-moe",
+    #     model_kwargs={'trust_remote_code': True},
+    #     encode_kwargs={'normalize_embeddings': True}
+    # )
 
     pdf_path = 'airplaneNoImage.pdf'
     chunk_size = 512
     data_string = pdf_to_text(pdf_path=pdf_path)
     ## Chunks is list of strings
     chunks = split_into_chunks(data_string, chunk_size=chunk_size)
-    embeddings = model.embed_documents(chunks) #model.encode(chunks)
+    embeddings = model.encode(chunks)
     st.session_state['embeddings'] = embeddings
     st.session_state['model'] = model
     st.session_state['chunks'] = chunks
@@ -126,7 +126,7 @@ with col1:
 
     # Append user message to chat history
 
-        question_embedded = st.session_state.model.embed_documents(user_message) #model.encode(user_message)
+        question_embedded = st.session_state.model.encode(user_message)
         similarities = st.session_state.model.similarity(st.session_state.embeddings, question_embedded)
         # Flatten the tensor (if it's a column vector)
         tensor_values = similarities.view(-1)
