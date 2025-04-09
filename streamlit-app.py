@@ -104,32 +104,12 @@ with col1:
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
 
-    # Display previous messages
-    st.markdown(
-        """
-        <style>
-        .scrollable-container {
-            height: 750px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 1rem;
-            border-radius: 10px;
-            background-color: #f9f9f9;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
 
-    # Create a scrollable container
-    with st.container():
-        st.markdown('<div class="scrollable-container">', unsafe_allow_html=True)
-    
-        for message in st.session_state["messages"]:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
-    
-        st.markdown('</div>', unsafe_allow_html=True)
+    for message in st.session_state["messages"]:
+        st.chat_message(message["role"]).write(message["content"])
+        # with st.chat_message(message["role"]):
+        #     st.markdown(message["content"])
+
 
     # User Input
     user_message = st.chat_input("Ask your question here")
