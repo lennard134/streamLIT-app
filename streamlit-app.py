@@ -5,7 +5,7 @@ import time
 import os
 import random
 import torch
-torch.classes.__path__ = []
+
 import streamlit as st
 
 from langchain_community.document_loaders import PyMuPDFLoader
@@ -19,6 +19,7 @@ from streamlit_pdf_reader import pdf_reader
 # ---- Config ----
 st.set_page_config(layout="wide")
 col1, col2 = st.columns([1, 1])  # Split screen
+torch.classes.__path__ = []
 
 # ---- Set PDF File (Preloaded) ----
 
@@ -105,7 +106,7 @@ with col1:
         st.session_state["messages"] = []
 
     # Display previous messages
-    message_box = st.container(height=600)
+    messages_box = st.container(height=600)
     for message in st.session_state["messages"]:
         message_box.st.chat_message(message["role"]).write(message["content"])
             # st.markdown(message["content"])
