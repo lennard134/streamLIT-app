@@ -4,8 +4,7 @@ import hashlib
 import time
 import os
 import random
-import torch
-_ = torch.__file__ 
+
 
 import streamlit as st
 
@@ -20,7 +19,8 @@ from streamlit_pdf_reader import pdf_reader
 # ---- Config ----
 st.set_page_config(layout="wide")
 col1, col2 = st.columns([1, 1])  # Split screen
-
+import torch
+_ = torch.__file__ 
 # ---- Set PDF File (Preloaded) ----
 
 def pdf_to_text(pdf_path):
