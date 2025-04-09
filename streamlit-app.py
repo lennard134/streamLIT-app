@@ -77,7 +77,7 @@ if 'embeddings' not in st.session_state:
     # model = SentenceTransformer(embed_name, trust_remote_code=True)
     model = SentenceTransformer(embed_name, trust_remote_code=True)
 
-    pdf_path = 'schoolgids.pdf'
+    pdf_path = 'https://dl.dropbox.com/scl/fi/ulostrswuboxiw1m7upmx/airplaneNoImage.pdf?rlkey=siyo50w98qdbcoedhqyj0swwk&st=p2c42igz&'
     chunk_size = 512
     data_string = pdf_to_text(pdf_path=pdf_path)
     ## Chunks is list of strings
