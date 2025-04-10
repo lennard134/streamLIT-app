@@ -155,13 +155,8 @@ with col1:
         # Embed user question
         
         # question_embedded = model.encode(user_message)
-        print("GOINNG IN FOR THE EMBEDDING")
-        question_embed = HF_client.feature_extraction(
-            user_message,
-            model="intfloat/multilingual-e5-large-instruct"
-        )
-        print("GOT THE EMBEDDING BOIIIIIOII")
-        st.popover("JAJAJAA")
+        question_embed = get_embedding_with_retry(user_message, HF_client)
+        
         # similarities = model.similarity(embeddings, question_embedded)
         similarities = []
         for chunk_embedding in embeddings:
@@ -201,10 +196,8 @@ with col1:
         )
 
         response_text = result.choices[0].message.content
-        st.session_state.messages.extend([
-            {"role": "RetrievedChunks", "content": retrieved_context},
-            {"role": "assistant", "content": response_text}
-        ])
+        st.session_state.messages.extend({"role": "RetrievedChunks", "content": retrieved_context})
+        st.session_state.messages.extend({"role": "assistant", "content": response_text})
 
         # Save to Supabase
         supabase_client.table("testEnvironment").insert({
