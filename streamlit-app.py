@@ -6,6 +6,7 @@ import os
 import random
 import requests
 import torch
+import base64
 _ = torch.__file__ 
 import tempfile
 
@@ -78,10 +79,8 @@ def download_pdf_from_url() -> bytes:
     response = requests.get("https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&")
     response.raise_for_status()
     pdf_bytes = response.content
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-        tmp.write(pdf_bytes)
-        tmp_path = tmp.name
-    return tmp_path
+    
+    return pdf_bytes
     
 # Session ID
 if 'session_id' not in st.session_state:
@@ -171,7 +170,7 @@ with col2:
     pdf_bytes = download_pdf_from_url()
     
     # If your pdf_reader can handle bytes:
-    pdf_reader(pdf_bytes)
+    pdf_reader(base64.b64decode(pdf_bytes))
     # pdf_reader(st.session_state['rawFile'])
 
 
