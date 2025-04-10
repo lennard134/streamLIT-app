@@ -28,46 +28,6 @@ st.set_page_config(layout="wide")
 col1, col2 = st.columns([1, 1])  # Split screen
 
 # ---- Set PDF File (Preloaded) ----
-
-# def pdf_to_text(pdf_path):
-#     """Extracts text from a PDF and returns it as a single long string."""
-#     doc = pymupdf.open(pdf_path)
-#     text = " ".join(page.get_text("text") for page in doc)
-#     return re.sub(r'\s+', ' ', text).strip()  # Clean up extra spaces/newlines
-
-#chunk split function
-# def split_into_chunks(text, chunk_size, overlap=0.05):
-#     """Splits text into chunks of given size with specified overlap."""
-#     overlap_size = int(chunk_size * overlap)
-#     chunks = []
-#     start = 0
-
-#     while start < len(text):
-#         end = start + chunk_size
-#         chunks.append(text[start:end])
-#         start += chunk_size - overlap_size  # Move forward with overlap
-
-#         if end >= len(text):  # Stop if reaching the end
-#             break
-
-    # return chunks
-
-
-# # document parse function
-# def document_parsing(file_path, chunk_size):
-#     """
-#     Document parser, processes uploaded document and splits text into chunks for a given chunksize.
-#     """
-#     loader = PyMuPDFLoader(file_path)
-#     pages = loader.load()
-#     text_splitter = CharacterTextSplitter(separator="\n", chunk_size=chunk_size, chunk_overlap=chunk_size/10, length_function=len)
-#     return text_splitter.split_documents(pages)
-    
-# Caching model load and embedding
-# @st.cache_resource
-# def load_model():
-#     return SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", trust_remote_code=True)
-
 @st.cache_data
 def get_chunks_and_embeddings(pdf_path, chunk_size=512):
     # data_string = pdf_to_text(pdf_path)
@@ -90,12 +50,9 @@ if 'session_id' not in st.session_state:
 
 # Load & cache resources
 pdf_path = "airplaneNoImage.pdf"
-# model = load_model()
 chunks, embeddings = get_chunks_and_embeddings(pdf_path)
 st.session_state['file_path'] = pdf_path
 st.session_state['chunks'] = chunks  # Small enough
-#st.session_state['rawFile'] = "https://www.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&dl=0"
-
 
 def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=1):
     retries = 0
@@ -164,16 +121,14 @@ with col1:
         
         # Retrieve the top 10 most similar chunks based on the indices
         top_10_similar_chunks = [chunks[idx] for idx in top_indices]
-        # tensor_values = similarities.view(-1)
-        # top_k = torch.topk(tensor_values, k=10)
-        # retrieved_context = ''.join([chunks[i] for i in top_k.indices])
-        retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
+        retrieved_context = '\n'.join(chunky for str(chunky +'\n') in top_10_similar_chunks)
         st.session_state.messages.append({"role": "user", "content": user_message})
         if "messages" in st.session_state:  
             last_message = st.session_state.messages[-1]
             print(f'Last message: {last_message}')
         else:
             last_message = ''
+        
         custom_prompt = f"""
                         You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
                         Your role is to:
