@@ -137,7 +137,7 @@ with col1:
 
         similarities = []
         for chunk_embedding in embeddings:
-            similarity = 1 - cosine(query_embedding, chunk_embedding)
+            similarity = 1 - cosine(question_embed, chunk_embedding)
             similarities.append(similarity)
 
         top_indices = np.argsort(similarities)[::-1][:10]  # Indices of the top 10 similar chunks
