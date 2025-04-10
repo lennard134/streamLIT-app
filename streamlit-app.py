@@ -106,8 +106,7 @@ def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=
                 user_message,
                 model="intfloat/multilingual-e5-large-instruct"
             )
-            if response.status_code == 200:
-                return response.json()
+            return question_embed
             else:
                 print(f"Request failed with status {response.status_code}: {response.text}")
                 retries += 1
