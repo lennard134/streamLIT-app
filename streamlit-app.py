@@ -121,7 +121,8 @@ with col1:
         # Embed user question
         question_embedded = model.encode(user_message)
         similarities = model.similarity(embeddings, question_embedded)
-        top_k = torch.topk(torch.tensor(similarities), k=10)
+        tensor_values = similarities.view(-1)
+        top_k = torch.topk(tensor_values, k=10)
         retrieved_context = ''.join([chunks[i] for i in top_k.indices])
 
         st.session_state.messages.append({"role": "user", "content": user_message})
