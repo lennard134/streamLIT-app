@@ -127,10 +127,18 @@ with col1:
 
         st.session_state.messages.append({"role": "user", "content": user_message})
 
-        custom_prompt = f"""You are a helpful assistant... [same as before]
-        - Retrieved Context: {retrieved_context}
-        - User Question: {user_message}
-        ..."""
+        custom_prompt = f"""
+                        You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
+                        Your role is to:
+                        1. Answer questions by the user using the provided retrieved documents.
+                        2. Never generate information beyond what is retrieved from the document.
+                        3. Use information provided by the user
+                        Inputs:
+                        - Retrieved Context: {retrieved_context}
+                        - User Question: {user_message}
+                        - Assitant previous response: {last_message}
+                        Provide a constructive response that is to the point and as concise as possible. Answer only based on the information retrieved from the document and given by the detective.                        
+                    """ 
 
         result = client.chat.completions.create(
             model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
