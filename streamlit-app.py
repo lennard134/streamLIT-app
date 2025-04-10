@@ -194,7 +194,7 @@ with col1:
             model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
             messages=[{"role": "assistant", "content": custom_prompt}],
         )
-
+        st.popover("JAJAJAAJAJAJ")
         response_text = result.choices[0].message.content
         st.session_state.messages.extend({"role": "RetrievedChunks", "content": retrieved_context})
         st.session_state.messages.extend({"role": "assistant", "content": response_text})
