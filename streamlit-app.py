@@ -155,7 +155,9 @@ with col1:
         # Embed user question
         
         # question_embedded = model.encode(user_message)
+        print("GOINNG IN FOR THE EMBEDDING")
         question_embed = get_embedding_with_retry(user_message, HF_client)
+        print("GOT THE EMBEDDING BOIIIIIOII")
         
         # similarities = model.similarity(embeddings, question_embedded)
         if question_embed is not None:
