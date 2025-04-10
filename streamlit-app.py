@@ -59,15 +59,6 @@ def document_parsing(file_path, chunk_size):
     text_splitter = CharacterTextSplitter(separator="\n", chunk_size=chunk_size, chunk_overlap=chunk_size/10, length_function=len)
     return text_splitter.split_documents(pages)
     
-def save_chat_to_db():
-    st.write(f"Implement code that writes data to DB")
-
-# Function for evaluation (Can be expanded)
-def evaluate_chat():
-    st.write("Evaluating session...")
-    num_interactions = len(st.session_state.messages) // 2  # Assuming user-bot pairs
-    st.write(f"Total interactions: {num_interactions}")
-
 # Caching model load and embedding
 @st.cache_resource
 def load_model():
@@ -78,9 +69,15 @@ def get_chunks_and_embeddings(pdf_path, chunk_size=512):
     data_string = pdf_to_text(pdf_path)
     chunks = split_into_chunks(data_string, chunk_size)
     model = load_model()
-    embeddings = model.encode(chunks)
+    embeddings = np.load('embeddings.npy')
     return chunks, embeddings
 
+@st.cache_data(show_spinner="Processing PDF...")
+def download_pdf_from_url(url: str) -> bytes:
+    response = requests.get("https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&")
+    response.raise_for_status()
+    return response.content
+    
 # Session ID
 if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
@@ -92,7 +89,7 @@ model = load_model()
 chunks, embeddings = get_chunks_and_embeddings(pdf_path)
 st.session_state['file_path'] = pdf_path
 st.session_state['chunks'] = chunks  # Small enough
-st.session_state['rawFile'] = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
+#st.session_state['rawFile'] = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
 
 # UI
 with col1:
@@ -165,6 +162,11 @@ with col1:
         st.rerun()
 
 with col2:
-    pdf_reader(st.session_state['rawFile'])
+    # Get and cache PDF content
+    pdf_bytes = download_pdf_from_url(dropbox_url)
+    
+    # If your pdf_reader can handle bytes:
+    pdf_reader(pdf_bytes)
+    # pdf_reader(st.session_state['rawFile'])
 
 
