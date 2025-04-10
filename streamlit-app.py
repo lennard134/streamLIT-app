@@ -136,7 +136,7 @@ with col1:
         # similarities = model.similarity(embeddings, question_embedded)
 
         similarities = []
-        for chunk_embedding in chunk_embeddings:
+        for chunk_embedding in embeddings:
             similarity = 1 - cosine(query_embedding, chunk_embedding)
             similarities.append(similarity)
 
