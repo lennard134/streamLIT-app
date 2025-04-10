@@ -77,7 +77,7 @@ def get_chunks_and_embeddings(pdf_path, chunk_size=512):
 def download_pdf_from_url() -> bytes:
     response = requests.get("https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&")
     response.raise_for_status()
-    pdf_bytes = respons.content
+    pdf_bytes = response.content
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
         tmp.write(pdf_bytes)
         tmp_path = tmp.name
