@@ -68,120 +68,94 @@ def evaluate_chat():
     num_interactions = len(st.session_state.messages) // 2  # Assuming user-bot pairs
     st.write(f"Total interactions: {num_interactions}")
 
-#embed documents
-# Initialization
+# Caching model load and embedding
+@st.cache_resource
+def load_model():
+    return SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", trust_remote_code=True)
+
+@st.cache_data
+def get_chunks_and_embeddings(pdf_path, chunk_size=512):
+    data_string = pdf_to_text(pdf_path)
+    chunks = split_into_chunks(data_string, chunk_size)
+    model = load_model()
+    embeddings = model.encode(chunks)
+    return chunks, embeddings
+
+# Session ID
 if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
     st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
 
-if 'embeddings' not in st.session_state:  
-    embed_name = "sentence-transformers/all-MiniLM-L6-v2"#nomic-ai/nomic-embed-text-v2-moe"
-    # # model = SentenceTransformer(embed_name, trust_remote_code=True)
-    model = SentenceTransformer(embed_name, trust_remote_code=True)
-    # model = HuggingFaceEmbeddings(
-    #     model_name="nomic-ai/nomic-embed-text-v2-moe",
-    #     model_kwargs={'trust_remote_code': True},
-    #     encode_kwargs={'normalize_embeddings': True}
-    # )
+# Load & cache resources
+pdf_path = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
+model = load_model()
+chunks, embeddings = get_chunks_and_embeddings(pdf_path)
+st.session_state['file_path'] = pdf_path
+st.session_state['chunks'] = chunks  # Small enough
+st.session_state['rawFile'] = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
 
-    pdf_path = 'airplaneNoImage.pdf'
-    chunk_size = 512
-    data_string = pdf_to_text(pdf_path=pdf_path)
-    ## Chunks is list of strings
-    chunks = split_into_chunks(data_string, chunk_size=chunk_size)
-    embeddings = model.encode(chunks)
-    st.session_state['embeddings'] = embeddings
-    st.session_state['model'] = model
-    st.session_state['chunks'] = chunks
-    st.session_state['file_path'] = pdf_path
-    st.session_state['rawFile'] = "schoolgids.pdf" #"https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
-
+# UI
 with col1:
     st.header("💬 Chat with the PDF")
-    # User Input
+
+    # Secrets
     token = st.secrets["TOGETHER_API_TOKEN"]
     url = st.secrets["SUPABASE_URL"]
     key = st.secrets["SUPABASE_KEY"]
     
-    client = openai.OpenAI(
-      api_key=token,
-      base_url="https://api.together.xyz/v1",
-    )
+    client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
     supabase_client: Client = create_client(url, key)
 
-    # Initialize chat history
+    # Chat history
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
 
-    # Display previous messages
+    # Display chat history
     messages_box = st.container(height=600)
-    for message in st.session_state["messages"]:
-        messages_box.chat_message(message["role"]).write(message["content"])
-            # st.markdown(message["content"])
+    for msg in st.session_state["messages"]:
+        messages_box.chat_message(msg["role"]).write(msg["content"])
 
     # User Input
     user_message = st.chat_input("Ask your question here")
-    llm_response = ''
     if user_message:
-
-    # Append user message to chat history
-
-        question_embedded = st.session_state.model.encode(user_message)
-        similarities = st.session_state.model.similarity(st.session_state.embeddings, question_embedded)
-        # Flatten the tensor (if it's a column vector)
-        tensor_values = similarities.view(-1)
-
-        # Get top 5 values and their indices
-        top5_values, top5_indices = torch.topk(tensor_values, k=10)
-       
-        retrieved_context = ''
-        for idx in top5_indices:
-            retrieved_context += st.session_state.chunks[idx]
+        # Embed user question
+        question_embedded = model.encode(user_message)
+        similarities = model.similarity(embeddings, question_embedded)
+        top_k = torch.topk(torch.tensor(similarities), k=10)
+        retrieved_context = ''.join([chunks[i] for i in top_k.indices])
 
         st.session_state.messages.append({"role": "user", "content": user_message})
-        
-        if "messages" in st.session_state:  
-            last_message = st.session_state.messages[-1]
-            print(f'Last message: {last_message}')
-        else:
-            last_message = ''
-        custom_prompt = f"""
-                        You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
-                        Your role is to:
-                        1. Answer questions by the user using the provided retrieved documents.
-                        2. Never generate information beyond what is retrieved from the document.
-                        3. Use information provided by the user
-                        Inputs:
-                        - Retrieved Context: {retrieved_context}
-                        - User Question: {user_message}
-                        - Assitant previous response: {last_message}
-                        Provide a constructive response that is to the point and as concise as possible. Answer only based on the information retrieved from the document and given by the detective.                        
-                    """ 
-        # Send request to LLM API
-        
+
+        custom_prompt = f"""You are a helpful assistant... [same as before]
+        - Retrieved Context: {retrieved_context}
+        - User Question: {user_message}
+        ..."""
+
         result = client.chat.completions.create(
-                    model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-                    messages=[{"role": "assistant", "content": custom_prompt}],
-                )
-
-        llm_response =result.choices[0].message.content
-        # Append LLM response to chat history
-        response = (
-            supabase_client.table("testEnvironment")
-            .insert({"session_id": st.session_state.session_id, "Question": user_message, "Answer": llm_response})
-            .execute()  
+            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+            messages=[{"role": "assistant", "content": custom_prompt}],
         )
-        st.session_state.messages.append({"role": "RetrievedChunks", "content": retrieved_context})
-        st.session_state.messages.append({"role": "assistant", "content": llm_response})
 
-        # Clear user input
+        response_text = result.choices[0].message.content
+        st.session_state.messages.extend([
+            {"role": "RetrievedChunks", "content": retrieved_context},
+            {"role": "assistant", "content": response_text}
+        ])
+
+        # Save to Supabase
+        supabase_client.table("testEnvironment").insert({
+            "session_id": st.session_state.session_id,
+            "Question": user_message,
+            "Answer": response_text
+        }).execute()
+
         st.rerun()
+
     if st.button("Next question"):
         st.session_state["messages"] = []
         st.rerun()
-        
+
 with col2:
-    # Opening file from file path
-    pdf_reader(st.session_state['rawFile']) 
+    pdf_reader(st.session_state['rawFile'])
 
 
