@@ -80,8 +80,8 @@ def get_chunks_and_embeddings(pdf_path, chunk_size=512):
     return chunks, embeddings
 
 @st.cache_data(persist="disk")
-def fetch_and_clean_data(url):
-    data = url
+def fetch_and_clean_data():
+    data = "https://www.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&dl=0"
     return data
 # Session ID
 if 'session_id' not in st.session_state:
@@ -211,7 +211,7 @@ with col1:
         st.rerun()
 
 with col2:
-    pdf_bytes = "https://www.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&dl=0"
+    pdf_bytes = fetch_and_clean_data()
     pdf_reader(pdf_bytes)
 
 
