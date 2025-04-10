@@ -7,6 +7,7 @@ import random
 import requests
 import torch
 _ = torch.__file__ 
+import tempfile
 
 import streamlit as st
 import numpy as np
@@ -76,7 +77,11 @@ def get_chunks_and_embeddings(pdf_path, chunk_size=512):
 def download_pdf_from_url() -> bytes:
     response = requests.get("https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&")
     response.raise_for_status()
-    return response.content
+    pdf_bytes = respons.content
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        tmp.write(pdf_bytes)
+        tmp_path = tmp.name
+    return tmp_path
     
 # Session ID
 if 'session_id' not in st.session_state:
