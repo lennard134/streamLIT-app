@@ -79,10 +79,10 @@ def get_chunks_and_embeddings(pdf_path, chunk_size=512):
     print(len(embeddings[0]))
     return chunks, embeddings
 
-# @st.cache_data(show_spinner="Processing PDF...")
-# def download_pdf_from_url() -> bytes:
-#     response = "airplaneNoImage.pdf"
-#     return response
+@st.cache_data(show_spinner="Processing PDF...")
+def download_pdf_from_url() -> bytes:
+    response = "https://drive.google.com/file/d/1MarcPdd5bLAVpyoTkU20m_fDVRTy0yyq/preview?usp=sharing"
+    return response
     
 # Session ID
 if 'session_id' not in st.session_state:
@@ -211,12 +211,12 @@ with col1:
         st.session_state["messages"] = []
         st.rerun()
 
-# with col2:
+with col2:
 #     # Get and cache PDF content
-#     pdf_bytes = download_pdf_from_url()
+    pdf_bytes = download_pdf_from_url()
     
 #     # If your pdf_reader can handle bytes:
-#     pdf_reader(pdf_bytes)
+    pdf_reader(pdf_bytes)
 #     # pdf_reader(st.session_state['rawFile'])
 
 
