@@ -9,7 +9,7 @@ import torch
 _ = torch.__file__ 
 
 import streamlit as st
-
+import numpy as np
 from langchain_community.document_loaders import PyMuPDFLoader
 
 import pymupdf
