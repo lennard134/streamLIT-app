@@ -70,13 +70,13 @@ def load_model():
 def get_chunks_and_embeddings(pdf_path, chunk_size=512):
     data_string = pdf_to_text(pdf_path)
     chunks = split_into_chunks(data_string, chunk_size)
-    model = load_model()
+    # model = load_model()
     embeddings = np.load('embeddings.npy')
     return chunks, embeddings
 
 @st.cache_data(show_spinner="Processing PDF...")
 def download_pdf_from_url() -> bytes:
-    response = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
+    response = "airplaneNoImage.pdf"
     return response
     
 # Session ID
