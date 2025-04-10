@@ -140,22 +140,18 @@ with col1:
         provider="hf-inference",
         api_key=HF_TOKEN,
     )
-    # # Chat history
-    
-    
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = []
 
-    # Display chat history
+    # Display previous messages
     messages_box = st.container(height=600)
-    for msg in st.session_state["messages"]:
-        messages_box.chat_message(msg["role"]).write(msg["content"])
-
+    for message in st.session_state["messages"]:
+        messages_box.chat_message(message["role"]).write(message["content"])
+        
     # User Input
     user_message = st.chat_input("Ask your question here")
     if user_message:
         # Embed user question
-        st.session_state.messages.append({"role": "user", "content": user_message})
-        if "messages" not in st.session_state:
-            st.session_state["messages"] = []
         # question_embedded = model.encode(user_message)
         question_embed = get_embedding_with_retry(user_message, HF_client)
         
