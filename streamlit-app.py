@@ -12,6 +12,7 @@ import pickle
 import streamlit as st
 import numpy as np
 from langchain_community.document_loaders import PyMuPDFLoader
+from scipy.spatial.distance import cosine
 
 import pymupdf
 
@@ -19,6 +20,8 @@ from langchain.text_splitter import CharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 from supabase import create_client, Client
 from streamlit_pdf_reader import pdf_reader
+from huggingface_hub import InferenceClient
+
 
 # ---- Config ----
 st.set_page_config(layout="wide")
@@ -61,9 +64,9 @@ col1, col2 = st.columns([1, 1])  # Split screen
 #     return text_splitter.split_documents(pages)
     
 # Caching model load and embedding
-@st.cache_resource
-def load_model():
-    return SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", trust_remote_code=True)
+# @st.cache_resource
+# def load_model():
+#     return SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", trust_remote_code=True)
 
 @st.cache_data
 def get_chunks_and_embeddings(pdf_path, chunk_size=512):
@@ -87,7 +90,7 @@ if 'session_id' not in st.session_state:
 
 # Load & cache resources
 pdf_path = "airplaneNoImage.pdf"
-model = load_model()
+# model = load_model()
 chunks, embeddings = get_chunks_and_embeddings(pdf_path)
 st.session_state['file_path'] = pdf_path
 st.session_state['chunks'] = chunks  # Small enough
@@ -101,10 +104,14 @@ with col1:
     token = st.secrets["TOGETHER_API_TOKEN"]
     url = st.secrets["SUPABASE_URL"]
     key = st.secrets["SUPABASE_KEY"]
+    HF_TOKEN = st.secrets["HF_API_TOKEN"]
     
     client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
     supabase_client: Client = create_client(url, key)
-
+    HF_client = InferenceClient(
+        provider="hf-inference",
+        api_key=HF_TOKEN,
+    )
     # Chat history
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
@@ -118,12 +125,28 @@ with col1:
     user_message = st.chat_input("Ask your question here")
     if user_message:
         # Embed user question
-        question_embedded = model.encode(user_message)
+        
+        # question_embedded = model.encode(user_message)
+        question_embed = client.feature_extraction(
+            inputs=user_message,
+            model="nomic-ai/nomic-embed-text-v2-moe",
+        )
+        
         similarities = model.similarity(embeddings, question_embedded)
-        tensor_values = similarities.view(-1)
-        top_k = torch.topk(tensor_values, k=10)
-        retrieved_context = ''.join([chunks[i] for i in top_k.indices])
 
+        similarities = []
+        for chunk_embedding in chunk_embeddings:
+            similarity = 1 - cosine(query_embedding, chunk_embedding)
+            similarities.append(similarity)
+
+        top_indices = np.argsort(similarities)[::-1][:10]  # Indices of the top 10 similar chunks
+        
+        # Retrieve the top 10 most similar chunks based on the indices
+        top_10_similar_chunks = [chunks[idx] for idx in top_indices]
+        # tensor_values = similarities.view(-1)
+        # top_k = torch.topk(tensor_values, k=10)
+        # retrieved_context = ''.join([chunks[i] for i in top_k.indices])
+        retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
         st.session_state.messages.append({"role": "user", "content": user_message})
 
         custom_prompt = f"""
