@@ -76,6 +76,7 @@ def get_chunks_and_embeddings(pdf_path, chunk_size=512):
         chunks = pickle.load(f)
     # model = load_model()
     embeddings = np.load('embeddings.npy')
+    print(len(embeddings[0]))
     return chunks, embeddings
 
 # @st.cache_data(show_spinner="Processing PDF...")
