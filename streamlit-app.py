@@ -130,8 +130,7 @@ with col1:
         # question_embedded = model.encode(user_message)
         question_embed = HF_client.feature_extraction(
             user_message,
-            model="nomic-ai/nomic-embed-text-v2-moe",
-            trust_remote_code=True
+            model="nomic-ai/nomic-embed-text-v2-moe"
         )
         
         similarities = model.similarity(embeddings, question_embedded)
