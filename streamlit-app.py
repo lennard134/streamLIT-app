@@ -79,11 +79,10 @@ def get_chunks_and_embeddings(pdf_path, chunk_size=512):
     print(len(embeddings[0]))
     return chunks, embeddings
 
-@st.cache_data(show_spinner="Processing PDF...")
-def download_pdf_from_url() -> bytes:
-    response = "https://drive.google.com/file/d/1MarcPdd5bLAVpyoTkU20m_fDVRTy0yyq/preview?usp=sharing"
-    return response
-    
+@st.cache_data(persist="disk")
+def fetch_and_clean_data(url):
+    data = url
+    return data
 # Session ID
 if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
@@ -95,7 +94,7 @@ pdf_path = "airplaneNoImage.pdf"
 chunks, embeddings = get_chunks_and_embeddings(pdf_path)
 st.session_state['file_path'] = pdf_path
 st.session_state['chunks'] = chunks  # Small enough
-#st.session_state['rawFile'] = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
+#st.session_state['rawFile'] = "https://www.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&dl=0"
 
 
 def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=1):
@@ -212,11 +211,7 @@ with col1:
         st.rerun()
 
 with col2:
-#     # Get and cache PDF content
-    pdf_bytes = download_pdf_from_url()
-    
-#     # If your pdf_reader can handle bytes:
+    pdf_bytes = "https://www.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&dl=0"
     pdf_reader(pdf_bytes)
-#     # pdf_reader(st.session_state['rawFile'])
 
 
