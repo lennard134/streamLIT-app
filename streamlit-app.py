@@ -96,7 +96,7 @@ chunks, embeddings = get_chunks_and_embeddings(pdf_path)
 st.session_state['file_path'] = pdf_path
 st.session_state['chunks'] = chunks  # Small enough
 #st.session_state['rawFile'] = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
-st.session_state["messages"] = []
+
 
 def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=1):
     retries = 0
@@ -141,8 +141,8 @@ with col1:
         api_key=HF_TOKEN,
     )
     # # Chat history
-    # if "messages" not in st.session_state:
-        
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = []
 
     # Display chat history
     messages_box = st.container(height=600)
@@ -194,7 +194,8 @@ with col1:
             model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
             messages=[{"role": "assistant", "content": custom_prompt}],
         )
-        st.popover("JAJAJAAJAJAJ")
+
+        
         response_text = result.choices[0].message.content
         st.session_state.messages.extend({"role": "RetrievedChunks", "content": retrieved_context})
         st.session_state.messages.extend({"role": "assistant", "content": response_text})
