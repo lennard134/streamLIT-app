@@ -167,7 +167,7 @@ with col2:
     pdf_bytes = download_pdf_from_url()
     
     # If your pdf_reader can handle bytes:
-    pdf_reader(base64.b64decode(pdf_bytes))
+    pdf_reader(pdf_bytes)
     # pdf_reader(st.session_state['rawFile'])
 
 
