@@ -22,30 +22,24 @@ col1, col2 = st.columns([1, 1])  # Split screen
 
 # ---- Set PDF File (Preloaded) ----
 @st.cache_data
-def get_chunks_and_embeddings(pdf_path, chunk_size=512):
-    # data_string = pdf_to_text(pdf_path)
-    # chunks = split_into_chunks(data_string, chunk_size)
+def get_chunks_and_embeddings():
     with open("chunks.pkl", "rb") as f:
         chunks = pickle.load(f)
-    # model = load_model()
     embeddings = np.load('embeddings.npy')
-    print(len(embeddings[0]))
     return chunks, embeddings
 
 @st.cache_data(persist="disk")
 def fetch_and_clean_data():
     data = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
     return data
+
 # Session ID
 if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
     st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
 
 # Load & cache resources
-pdf_path = "airplaneNoImage.pdf"
-chunks, embeddings = get_chunks_and_embeddings(pdf_path)
-st.session_state['file_path'] = pdf_path
-st.session_state['chunks'] = chunks  # Small enough
+chunks, embeddings = get_chunks_and_embeddings()
 
 def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=1):
     retries = 0
@@ -101,10 +95,8 @@ with col1:
     user_message = st.chat_input("Ask your question here")
     if user_message:
         # Embed user question
-        # question_embedded = model.encode(user_message)
         question_embed = get_embedding_with_retry(user_message, HF_client)
         
-        # similarities = model.similarity(embeddings, question_embedded)
         similarities = []
         for chunk_embedding in embeddings:
             similarity = 1 - cosine(question_embed, chunk_embedding)
