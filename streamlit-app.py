@@ -211,7 +211,6 @@ with col1:
         st.rerun()
 
 with col2:
-    pdf_bytes = fetch_and_clean_data()
-    pdf_reader(pdf_bytes)
+    pdf_reader(fetch_and_clean_data())
 
 
