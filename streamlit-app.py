@@ -156,7 +156,10 @@ with col1:
         
         # question_embedded = model.encode(user_message)
         print("GOINNG IN FOR THE EMBEDDING")
-        question_embed = get_embedding_with_retry(user_message, HF_client)
+        question_embed = HF_client.feature_extraction(
+            user_message,
+            model="intfloat/multilingual-e5-large-instruct"
+        )
         print("GOT THE EMBEDDING BOIIIIIOII")
         
         # similarities = model.similarity(embeddings, question_embedded)
