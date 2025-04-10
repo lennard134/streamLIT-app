@@ -128,7 +128,7 @@ with col1:
         # Embed user question
         
         # question_embedded = model.encode(user_message)
-        question_embed = client.feature_extraction(
+        question_embed = HF_client.feature_extraction(
             inputs=user_message,
             model="nomic-ai/nomic-embed-text-v2-moe",
         )
