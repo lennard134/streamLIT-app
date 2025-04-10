@@ -133,7 +133,7 @@ with col1:
             model="intfloat/multilingual-e5-large"
         )
         
-        similarities = model.similarity(embeddings, question_embedded)
+        # similarities = model.similarity(embeddings, question_embedded)
 
         similarities = []
         for chunk_embedding in chunk_embeddings:
