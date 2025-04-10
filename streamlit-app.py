@@ -150,7 +150,11 @@ with col1:
         # retrieved_context = ''.join([chunks[i] for i in top_k.indices])
         retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
         st.session_state.messages.append({"role": "user", "content": user_message})
-
+        if "messages" in st.session_state:  
+            last_message = st.session_state.messages[-1]
+            print(f'Last message: {last_message}')
+        else:
+            last_message = ''
         custom_prompt = f"""
                         You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
                         Your role is to:
