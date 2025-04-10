@@ -73,7 +73,7 @@ def get_chunks_and_embeddings(pdf_path, chunk_size=512):
     return chunks, embeddings
 
 @st.cache_data(show_spinner="Processing PDF...")
-def download_pdf_from_url(url: str) -> bytes:
+def download_pdf_from_url() -> bytes:
     response = requests.get("https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&")
     response.raise_for_status()
     return response.content
@@ -163,7 +163,7 @@ with col1:
 
 with col2:
     # Get and cache PDF content
-    pdf_bytes = download_pdf_from_url(dropbox_url)
+    pdf_bytes = download_pdf_from_url()
     
     # If your pdf_reader can handle bytes:
     pdf_reader(pdf_bytes)
