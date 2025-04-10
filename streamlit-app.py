@@ -87,7 +87,7 @@ if 'session_id' not in st.session_state:
     st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
 
 # Load & cache resources
-pdf_path = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
+pdf_path = "airplaneNoImage.pdf"
 model = load_model()
 chunks, embeddings = get_chunks_and_embeddings(pdf_path)
 st.session_state['file_path'] = pdf_path
