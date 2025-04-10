@@ -161,63 +161,59 @@ with col1:
             model="intfloat/multilingual-e5-large-instruct"
         )
         print("GOT THE EMBEDDING BOIIIIIOII")
-        
+        st.popover("JAJAJAA")
         # similarities = model.similarity(embeddings, question_embedded)
-        if question_embed is not None:
-            similarities = []
-            for chunk_embedding in embeddings:
-                similarity = 1 - cosine(question_embed, chunk_embedding)
-                similarities.append(similarity)
-    
-            top_indices = np.argsort(similarities)[::-1][:10]  # Indices of the top 10 similar chunks
-            
-            # Retrieve the top 10 most similar chunks based on the indices
-            top_10_similar_chunks = [chunks[idx] for idx in top_indices]
-            # tensor_values = similarities.view(-1)
-            # top_k = torch.topk(tensor_values, k=10)
-            # retrieved_context = ''.join([chunks[i] for i in top_k.indices])
-            retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
-            st.session_state.messages.append({"role": "user", "content": user_message})
-            if "messages" in st.session_state:  
-                last_message = st.session_state.messages[-1]
-                print(f'Last message: {last_message}')
-            else:
-                last_message = ''
-            custom_prompt = f"""
-                            You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
-                            Your role is to:
-                            1. Answer questions by the user using the provided retrieved documents.
-                            2. Never generate information beyond what is retrieved from the document.
-                            3. Use information provided by the user
-                            Inputs:
-                            - Retrieved Context: {retrieved_context}
-                            - User Question: {user_message}
-                            - Assitant previous response: {last_message}
-                            Provide a constructive response that is to the point and as concise as possible. Answer only based on the information retrieved from the document and given by the detective.                        
-                        """ 
-    
-            result = client.chat.completions.create(
-                model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-                messages=[{"role": "assistant", "content": custom_prompt}],
-            )
-    
-            response_text = result.choices[0].message.content
-            st.session_state.messages.extend([
-                {"role": "RetrievedChunks", "content": retrieved_context},
-                {"role": "assistant", "content": response_text}
-            ])
-    
-            # Save to Supabase
-            supabase_client.table("testEnvironment").insert({
-                "session_id": st.session_state.session_id,
-                "Question": user_message,
-                "Answer": response_text
-            }).execute()
-    
-            st.rerun()
+        similarities = []
+        for chunk_embedding in embeddings:
+            similarity = 1 - cosine(question_embed, chunk_embedding)
+            similarities.append(similarity)
+
+        top_indices = np.argsort(similarities)[::-1][:10]  # Indices of the top 10 similar chunks
+        
+        # Retrieve the top 10 most similar chunks based on the indices
+        top_10_similar_chunks = [chunks[idx] for idx in top_indices]
+        # tensor_values = similarities.view(-1)
+        # top_k = torch.topk(tensor_values, k=10)
+        # retrieved_context = ''.join([chunks[i] for i in top_k.indices])
+        retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
+        st.session_state.messages.append({"role": "user", "content": user_message})
+        if "messages" in st.session_state:  
+            last_message = st.session_state.messages[-1]
+            print(f'Last message: {last_message}')
         else:
-            st.write("Failed to connect to API, please ask your question again")
-            st.rerun()
+            last_message = ''
+        custom_prompt = f"""
+                        You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
+                        Your role is to:
+                        1. Answer questions by the user using the provided retrieved documents.
+                        2. Never generate information beyond what is retrieved from the document.
+                        3. Use information provided by the user
+                        Inputs:
+                        - Retrieved Context: {retrieved_context}
+                        - User Question: {user_message}
+                        - Assitant previous response: {last_message}
+                        Provide a constructive response that is to the point and as concise as possible. Answer only based on the information retrieved from the document and given by the detective.                        
+                    """ 
+
+        result = client.chat.completions.create(
+            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+            messages=[{"role": "assistant", "content": custom_prompt}],
+        )
+
+        response_text = result.choices[0].message.content
+        st.session_state.messages.extend([
+            {"role": "RetrievedChunks", "content": retrieved_context},
+            {"role": "assistant", "content": response_text}
+        ])
+
+        # Save to Supabase
+        supabase_client.table("testEnvironment").insert({
+            "session_id": st.session_state.session_id,
+            "Question": user_message,
+            "Answer": response_text
+        }).execute()
+
+        st.rerun()
 
     if st.button("Next question"):
         st.session_state["messages"] = []
