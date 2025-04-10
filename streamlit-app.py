@@ -88,14 +88,14 @@ if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
     st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
 
-    # Load & cache resources
-    pdf_path = "airplaneNoImage.pdf"
-    # model = load_model()
-    chunks, embeddings = get_chunks_and_embeddings(pdf_path)
-    st.session_state['file_path'] = pdf_path
-    st.session_state['chunks'] = chunks  # Small enough
-    #st.session_state['rawFile'] = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
-    st.session_state["messages"] = []
+# Load & cache resources
+pdf_path = "airplaneNoImage.pdf"
+# model = load_model()
+chunks, embeddings = get_chunks_and_embeddings(pdf_path)
+st.session_state['file_path'] = pdf_path
+st.session_state['chunks'] = chunks  # Small enough
+#st.session_state['rawFile'] = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
+st.session_state["messages"] = []
 
 # UI
 with col1:
