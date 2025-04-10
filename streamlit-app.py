@@ -5,19 +5,12 @@ import time
 import os
 import random
 import requests
-import torch
-import base64
-_ = torch.__file__ 
+
 import pickle 
 import streamlit as st
 import numpy as np
-from langchain_community.document_loaders import PyMuPDFLoader
 from scipy.spatial.distance import cosine
 
-import pymupdf
-
-from langchain.text_splitter import CharacterTextSplitter
-from sentence_transformers import SentenceTransformer
 from supabase import create_client, Client
 from streamlit_pdf_reader import pdf_reader
 from huggingface_hub import InferenceClient
