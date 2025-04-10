@@ -8,8 +8,7 @@ import requests
 import torch
 import base64
 _ = torch.__file__ 
-import tempfile
-
+import pickle 
 import streamlit as st
 import numpy as np
 from langchain_community.document_loaders import PyMuPDFLoader
@@ -27,39 +26,39 @@ col1, col2 = st.columns([1, 1])  # Split screen
 
 # ---- Set PDF File (Preloaded) ----
 
-def pdf_to_text(pdf_path):
-    """Extracts text from a PDF and returns it as a single long string."""
-    doc = pymupdf.open(pdf_path)
-    text = " ".join(page.get_text("text") for page in doc)
-    return re.sub(r'\s+', ' ', text).strip()  # Clean up extra spaces/newlines
+# def pdf_to_text(pdf_path):
+#     """Extracts text from a PDF and returns it as a single long string."""
+#     doc = pymupdf.open(pdf_path)
+#     text = " ".join(page.get_text("text") for page in doc)
+#     return re.sub(r'\s+', ' ', text).strip()  # Clean up extra spaces/newlines
 
 #chunk split function
-def split_into_chunks(text, chunk_size, overlap=0.05):
-    """Splits text into chunks of given size with specified overlap."""
-    overlap_size = int(chunk_size * overlap)
-    chunks = []
-    start = 0
+# def split_into_chunks(text, chunk_size, overlap=0.05):
+#     """Splits text into chunks of given size with specified overlap."""
+#     overlap_size = int(chunk_size * overlap)
+#     chunks = []
+#     start = 0
 
-    while start < len(text):
-        end = start + chunk_size
-        chunks.append(text[start:end])
-        start += chunk_size - overlap_size  # Move forward with overlap
+#     while start < len(text):
+#         end = start + chunk_size
+#         chunks.append(text[start:end])
+#         start += chunk_size - overlap_size  # Move forward with overlap
 
-        if end >= len(text):  # Stop if reaching the end
-            break
+#         if end >= len(text):  # Stop if reaching the end
+#             break
 
-    return chunks
+    # return chunks
 
 
-# document parse function
-def document_parsing(file_path, chunk_size):
-    """
-    Document parser, processes uploaded document and splits text into chunks for a given chunksize.
-    """
-    loader = PyMuPDFLoader(file_path)
-    pages = loader.load()
-    text_splitter = CharacterTextSplitter(separator="\n", chunk_size=chunk_size, chunk_overlap=chunk_size/10, length_function=len)
-    return text_splitter.split_documents(pages)
+# # document parse function
+# def document_parsing(file_path, chunk_size):
+#     """
+#     Document parser, processes uploaded document and splits text into chunks for a given chunksize.
+#     """
+#     loader = PyMuPDFLoader(file_path)
+#     pages = loader.load()
+#     text_splitter = CharacterTextSplitter(separator="\n", chunk_size=chunk_size, chunk_overlap=chunk_size/10, length_function=len)
+#     return text_splitter.split_documents(pages)
     
 # Caching model load and embedding
 @st.cache_resource
@@ -68,16 +67,18 @@ def load_model():
 
 @st.cache_data
 def get_chunks_and_embeddings(pdf_path, chunk_size=512):
-    data_string = pdf_to_text(pdf_path)
-    chunks = split_into_chunks(data_string, chunk_size)
+    # data_string = pdf_to_text(pdf_path)
+    # chunks = split_into_chunks(data_string, chunk_size)
+    with open("chunks.pkl", "rb") as f:
+        chunks = pickle.load(f)
     # model = load_model()
     embeddings = np.load('embeddings.npy')
     return chunks, embeddings
 
-@st.cache_data(show_spinner="Processing PDF...")
-def download_pdf_from_url() -> bytes:
-    response = "airplaneNoImage.pdf"
-    return response
+# @st.cache_data(show_spinner="Processing PDF...")
+# def download_pdf_from_url() -> bytes:
+#     response = "airplaneNoImage.pdf"
+#     return response
     
 # Session ID
 if 'session_id' not in st.session_state:
@@ -162,12 +163,12 @@ with col1:
         st.session_state["messages"] = []
         st.rerun()
 
-with col2:
-    # Get and cache PDF content
-    pdf_bytes = download_pdf_from_url()
+# with col2:
+#     # Get and cache PDF content
+#     pdf_bytes = download_pdf_from_url()
     
-    # If your pdf_reader can handle bytes:
-    pdf_reader(pdf_bytes)
-    # pdf_reader(st.session_state['rawFile'])
+#     # If your pdf_reader can handle bytes:
+#     pdf_reader(pdf_bytes)
+#     # pdf_reader(st.session_state['rawFile'])
 
 
