@@ -206,7 +206,7 @@ with col1:
 
         st.rerun()
 
-    if st.button("Next question"):
+    if st.button("Reset Chat history"):
         st.session_state["messages"] = []
         st.rerun()
 
