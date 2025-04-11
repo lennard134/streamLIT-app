@@ -29,17 +29,17 @@ def get_chunks_and_embeddings():
     embeddings = np.load('embeddings.npy')
     return chunks, embeddings
 
-@st.cache_data(persist="disk")
-def fetch_pdf():
-    url = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
-    response = requests.get(url)
-    return response.content  # cached
+# @st.cache_data(persist="disk")
+# def fetch_pdf():
+#     url = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
+#     response = requests.get(url)
+#     return response.content  # cached
 
-def fetch_and_clean_data(pdf_bytes):
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-        tmp_file.write(pdf_bytes)
-        tmp_path = tmp_file.name
-    pdf_reader(tmp_path)
+# def fetch_and_clean_data(pdf_bytes):
+#     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+#         tmp_file.write(pdf_bytes)
+#         tmp_path = tmp_file.name
+#     pdf_reader(tmp_path)
 
 # Session ID
 if 'session_id' not in st.session_state:
@@ -159,5 +159,5 @@ with col1:
         st.rerun()
 pdf_bytes = fetch_pdf()
 with col2:
-    fetch_and_clean_data(pdf_bytes)
+    pdf_reader("airplaneNoImage.pdf")
 
