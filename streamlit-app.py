@@ -31,7 +31,7 @@ def get_chunks_and_embeddings():
 
 @st.cache_data(persist="disk")
 def fetch_pdf():
-    url = "https://www.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&dl=0"
+    url = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
     response = requests.get(url)
     return response.content  # cached
 
