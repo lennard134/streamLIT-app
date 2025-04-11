@@ -28,10 +28,21 @@ def get_chunks_and_embeddings():
     embeddings = np.load('embeddings.npy')
     return chunks, embeddings
 
+
 @st.cache_data(persist="disk")
+def fetch_pdf():
+    url = "https://www.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&dl=0"
+    response = requests.get(url)
+    return response.content  # cached
+
 def fetch_and_clean_data():
-    data = "https://dl.dropbox.com/scl/fi/7esc4cp02p2kzuela3kgo/airplane.pdf?rlkey=dzmijzy8orn9bie73rmituaua&st=iws9qm3s&"
-    return data
+    pdf_bytes = fetch_pdf()
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+        tmp_file.write(pdf_bytes)
+        tmp_path = tmp_file.name
+    pdf_reader(fetch_and_clean_data())
+
+    
 
 # Session ID
 if 'session_id' not in st.session_state:
@@ -151,6 +162,5 @@ with col1:
         st.rerun()
 
 with col2:
-    pdf_reader(fetch_and_clean_data())
-
+    fetch_and_clean_data()
 
