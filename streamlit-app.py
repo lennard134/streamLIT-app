@@ -39,7 +39,8 @@ def fetch_and_clean_data(pdf_bytes):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
         tmp_file.write(pdf_bytes)
         tmp_path = tmp_file.name
-    pdf_reader(tmp_path)
+    print(tmp_path)
+    pdf_reader(tmp_file)
 
     
 
