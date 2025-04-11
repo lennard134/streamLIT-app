@@ -95,14 +95,20 @@ def get_model_response(user_message, HF_client, model_name, max_retries=10, wait
 
 
 # UI
-st.toast("USER INPUT PLEASE")
-if user_input < 100:
-    model_name = "meta-llama/Llama-3.2-1B-Instruct"
-elif 100 <= user_input < 500:
-    model_name = "meta-llama/Llama-3.2-3B-Instruct"
-else:
-    model_name = "meta-llama/Llama-3.2-3B-Instruct"
+if not user_input:
+    st.warning('Put your unique ID in the sidebar to continue', icon="⚠️")
+with st.sidebar:
+    user_input = st.text_input("Please insert your unique identifier", "tr...")
+    user_input = user_input.replace('tr', '')
+    user_input = int(user_input)
     
+    if user_input < 100:
+        model_name = "meta-llama/Llama-3.2-1B-Instruct"
+    elif 100 <= user_input < 500:
+        model_name = "meta-llama/Llama-3.2-3B-Instruct"
+    else:
+        model_name = "meta-llama/Llama-3.2-3B-Instruct"
+        
 with col1:
     st.header("💬 Chat with the PDF")
 
