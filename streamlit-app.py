@@ -140,6 +140,7 @@ with st.sidebar:
         else:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
 
+pattern = r"^tr\d{3}$"
 if re.match(pattern, user_input):
     with col1:
         st.header("💬 Chat with the PDF")
