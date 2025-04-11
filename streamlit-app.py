@@ -35,12 +35,11 @@ def fetch_pdf():
     response = requests.get(url)
     return response.content  # cached
 
-def fetch_and_clean_data():
-    pdf_bytes = fetch_pdf()
+def fetch_and_clean_data(pdf_bytes):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
         tmp_file.write(pdf_bytes)
         tmp_path = tmp_file.name
-    pdf_reader(fetch_and_clean_data())
+    pdf_reader(tmp_path)
 
     
 
@@ -160,7 +159,7 @@ with col1:
     if st.button("Reset Chat history"):
         st.session_state["messages"] = []
         st.rerun()
-
+pdf_bytes = fetch_pdf()
 with col2:
-    fetch_and_clean_data()
+    fetch_and_clean_data(pdf_bytes)
 
