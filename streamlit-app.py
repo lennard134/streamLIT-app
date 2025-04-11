@@ -145,7 +145,9 @@ with col1:
         
         # Retrieve the top 10 most similar chunks based on the indices
         top_10_similar_chunks = [chunks[idx] for idx in top_indices]
-        retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
+        retrieved_context = "Answer based on the following context:\n" + "\n\n".join(top_10_similar_chunks)
+
+        # retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
         st.session_state.messages.append({"role": "user", "content": user_message})
         if "messages" in st.session_state:  
             last_message = st.session_state.messages[-1]
