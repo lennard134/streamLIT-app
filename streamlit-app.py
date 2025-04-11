@@ -78,13 +78,14 @@ def get_model_response(user_message, HF_client, max_retries=10, wait_time=1):
     while retries < max_retries:
         try:
             completion = HF_client.chat.completions.create(
-                model="meta-llama/Llama-3.2-3B",
+                model="meta-llama/Llama-3.2-3B-Instruct",
                 messages=[
                     {
-                        "role": "assistant",
+                        "role": "user",
                         "content": user_message
                     }
                 ],
+                max_tokens=500,
             )
             if completion is not None:
                 return completion.choices[0].message
