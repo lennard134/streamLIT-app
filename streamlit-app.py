@@ -28,7 +28,33 @@ def get_chunks_and_embeddings():
         chunks = pickle.load(f)
     embeddings = np.load('embeddings.npy')
     return chunks, embeddings
+    
+def expand_to_full_sentence(chunks, index):
+    current = chunks[index]
+    prev = chunks[index - 1] if index > 0 else ''
+    next_ = chunks[index + 1] if index < len(chunks) - 1 else ''
 
+    combined = prev + current + next_
+    start_idx = len(prev)
+    end_idx = start_idx + len(current)
+
+    # Scan backwards to sentence start (find last punctuation before start)
+    sentence_start = 0
+    for i in range(start_idx - 1, -1, -1):
+        if combined[i] in '.!?\n':
+            if i + 1 < len(combined) and combined[i+1].isspace():
+                sentence_start = i + 1
+                break
+
+    # Scan forward to sentence end (find first punctuation after end)
+    sentence_end = len(combined)
+    for i in range(end_idx, len(combined)):
+        if combined[i] in '.!?':
+            if i + 1 == len(combined) or combined[i+1].isspace():
+                sentence_end = i + 1
+                break
+
+    return combined[sentence_start:sentence_end].strip()
 # Session ID
 if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
@@ -149,7 +175,9 @@ with col1:
         top_indices = np.argsort(similarities)[::-1][:5]  # Indices of the top 10 similar chunks
         
         # Retrieve the top 10 most similar chunks based on the indices
-        top_10_similar_chunks = [chunks[idx] for idx in top_indices]
+        # top_10_similar_chunks= [chunks[idx] for idx in top_indices]
+        top_10_similar_chunks = [expand_to_full_sentence(chunks, idx) for idx in top_indices]
+
         retrieved_context = "Answer based on the following context:\n" + "\n\n".join(top_10_similar_chunks)
 
         # retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
