@@ -88,7 +88,7 @@ def get_model_response(user_message, HF_client, max_retries=10, wait_time=1):
                 max_tokens=500,
             )
             if completion is not None:
-                return completion.choices[0].message
+                return completion.choices[0].message.content
             else:
                 retries += 1
                 wait_time = wait_time * 2  # Exponentially increase wait time
