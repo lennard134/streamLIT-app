@@ -60,7 +60,6 @@ def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=
             if question_embed is not None:
                 return question_embed
             else:
-                print(f"Request failed with status {response.status_code}: {response.text}")
                 retries += 1
                 wait_time = wait_time * 2  # Exponentially increase wait time
                 print(f"Retrying... {retries}/{max_retries}")
@@ -73,8 +72,39 @@ def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=
             print(f"Retrying... {retries}/{max_retries}")
             time.sleep(wait_time)
     
-    print("Max retries reached. Unable to get a valid response.")
     return None
+def get_model_response(user_message, HF_client, max_retries=10, wait_time=1):
+    retries = 0
+    while retries < max_retries:
+        try:
+            completion = HF_client.chat.completions.create(
+                model="meta-llama/Llama-3.2-3B",
+                messages=[
+                    {
+                        "role": "assistant",
+                        "content": user_message
+                    }
+                ],
+            )
+            if completion is not None:
+                return completion.choices[0].message
+            else:
+                retries += 1
+                wait_time = wait_time * 2  # Exponentially increase wait time
+                print(f"Retrying... {retries}/{max_retries}")
+                time.sleep(wait_time)
+        
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed due to error: {e}")
+            retries += 1
+            wait_time = wait_time * 2  # Exponentially increase wait time
+            print(f"Retrying... {retries}/{max_retries}")
+            time.sleep(wait_time)
+    
+    return None
+    
+
+
 # UI
 with col1:
     st.header("💬 Chat with the PDF")
@@ -135,13 +165,13 @@ with col1:
                         Provide a constructive response that is to the point and as concise as possible. Answer only based on the information retrieved from the document and given by the detective.                        
                     """ 
 
-        result = client.chat.completions.create(
-            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-            messages=[{"role": "assistant", "content": custom_prompt}],
-        )
-
+        # result = client.chat.completions.create(
+        #     model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        #     messages=[{"role": "assistant", "content": custom_prompt}],
+        # )
+        # response_text = result.choices[0].message.content
         
-        response_text = result.choices[0].message.content
+        response_text = get_model_response(custom_prompt, HF_client)
         st.session_state.messages.append({"role": "RetrievedChunks", "content": retrieved_context})
         st.session_state.messages.append({"role": "assistant", "content": response_text})
 
