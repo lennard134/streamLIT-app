@@ -30,7 +30,6 @@ def get_chunks_and_embeddings():
     return chunks, embeddings
     
 def expand_to_full_sentence(chunks, index):
-    def expand_to_full_sentence(chunks, index):
     current = chunks[index]
     prev = chunks[index - 1] if index > 0 else ''
     next_ = chunks[index + 1] if index < len(chunks) - 1 else ''
