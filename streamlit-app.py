@@ -97,7 +97,10 @@ def get_model_response(user_message, HF_client, model_name, max_retries=10, wait
 with st.sidebar:
     user_input = st.text_input("Please insert your unique identifier", "tr...")
 
-    if user_input == "tr...":
+    # Define the regular expression pattern for "tr" followed by exactly three digits
+    pattern = r"^tr\d{3}$"
+    
+    if not re.match(pattern, user_input):
         st.warning('Put your unique ID in the sidebar to continue', icon="⚠️")
     else:
         user_input = user_input.replace('tr', '')
@@ -168,14 +171,7 @@ with col1:
                         - User Question: {user_message}
                         - Assitant previous response: {last_message}
                         Provide a constructive response that is to the point and as concise as possible. Answer only based on the information retrieved from the document and given by the detective.                        
-                    """ 
-
-        # result = client.chat.completions.create(
-        #     model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-        #     messages=[{"role": "assistant", "content": custom_prompt}],
-        # )
-        # response_text = result.choices[0].message.content
-        
+                    """         
         response_text = get_model_response(custom_prompt, HF_client, model_name)
         st.session_state.messages.append({"role": "RetrievedChunks", "content": retrieved_context})
         st.session_state.messages.append({"role": "assistant", "content": response_text})
