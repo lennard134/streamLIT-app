@@ -129,7 +129,7 @@ with st.sidebar:
     pattern = r"^tr\d{3}$"
     
     if not re.match(pattern, user_input):
-        st.warning('Put your unique ID in the sidebar to continue', icon="⚠️")
+        st.warning('Retrieve your ID from the qualtrics environment and insert here', icon="⚠️")
     else:
         user_input = user_input.replace('tr', '')
         user_input = int(user_input)
