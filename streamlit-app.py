@@ -157,7 +157,7 @@ with col1:
     if st.button("Reset Chat history"):
         st.session_state["messages"] = []
         st.rerun()
-pdf_bytes = fetch_pdf()
+# pdf_bytes = fetch_pdf()
 with col2:
     pdf_reader("airplaneNoImage.pdf")
 
