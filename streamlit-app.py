@@ -36,11 +36,10 @@ def fetch_pdf():
     return response.content  # cached
 
 def fetch_and_clean_data(pdf_bytes):
-    # with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-    #     tmp_file.write(pdf_bytes)
-    #     tmp_path = tmp_file.name
-    base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
-    pdf_reader(base64_pdf)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+        tmp_file.write(pdf_bytes)
+        tmp_path = tmp_file.name
+    pdf_reader(tmp_file)
 
 # Session ID
 if 'session_id' not in st.session_state:
