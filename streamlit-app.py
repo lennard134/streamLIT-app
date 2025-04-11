@@ -130,18 +130,20 @@ with st.sidebar:
     
     if not re.match(pattern, user_input):
         st.warning('Retrieve your ID from the qualtrics environment and insert here', icon="⚠️")
+        st.session_state["MODEL_CHOSEN"] = False
     else:
         user_input = user_input.replace('tr', '')
         user_input = int(user_input)
+        st.session_state["MODEL_CHOSEN"] = True
         if user_input < 100:
             model_name = "meta-llama/Llama-3.2-1B-Instruct"
         elif 100 <= user_input < 500:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
         else:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
-
-pattern = r"^tr\d{3}$"
-if re.match(pattern, user_input):
+            
+    
+if st.session_state["MODEL_CHOSEN"] == True:
     with col1:
         st.header("💬 Chat with the PDF")
     
