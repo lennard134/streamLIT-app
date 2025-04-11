@@ -102,12 +102,12 @@ with st.sidebar:
     else:
         user_input = user_input.replace('tr', '')
         user_input = int(user_input)
-    if user_input < 100:
-        model_name = "meta-llama/Llama-3.2-1B-Instruct"
-    elif 100 <= user_input < 500:
-        model_name = "meta-llama/Llama-3.2-3B-Instruct"
-    else:
-        model_name = "meta-llama/Llama-3.2-3B-Instruct"
+        if user_input < 100:
+            model_name = "meta-llama/Llama-3.2-1B-Instruct"
+        elif 100 <= user_input < 500:
+            model_name = "meta-llama/Llama-3.2-3B-Instruct"
+        else:
+            model_name = "meta-llama/Llama-3.2-3B-Instruct"
         
 with col1:
     st.header("💬 Chat with the PDF")
