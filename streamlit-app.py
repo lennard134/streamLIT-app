@@ -195,10 +195,6 @@ if st.session_state["MODEL_CHOSEN"] == True:
     
             st.rerun()
     
-        if st.button("Reset Chat history"):
-            st.session_state["messages"] = []
-            st.rerun()
-    # pdf_bytes = fetch_pdf()
     with col2:
         pdf_reader("airplaneNoImage.pdf")
 else:
