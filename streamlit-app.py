@@ -38,9 +38,9 @@ def expand_to_full_sentence(chunks, index):
     start_idx = len(prev)
 
     # Scan forward for end
-    match = re.search(r"[.!?]", next_)
-    if match:
-        index = match.start()
+    match = list(re.finditer(r"[.!?]", prev))
+    if len(match) > 0:
+        index = match[0].start()
         print("First punctuation found at index:", index)
         combined = current + next_[0:index+1]
     else:
