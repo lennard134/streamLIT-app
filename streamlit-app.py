@@ -141,12 +141,14 @@ with st.sidebar:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
         else:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
-            
+    context_box = st.container(height=450)
     for message in st.session_state["messages"]:
         if message["role"] == "RetrievedChunks":
-            st.write(message["role"]).write(message["content"])
+            context_box.chat_message(message["role"]).write(message["content"])
             break;
-            
+             
+
+             
 if st.session_state["MODEL_CHOSEN"] == True:
     with col1:
         st.header("💬 Chat with the PDF")
