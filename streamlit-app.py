@@ -172,7 +172,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
         # Display previous messages
         messages_box = st.container(height=600)
         for message in st.session_state["messages"]:
-            if len(st.session_stage["messages"]) > 0:
+            if len(st.session_state["messages"]) > 0:
                 if message["role"] != "RetrievedChunks":
                     messages_box.chat_message(message["role"]).write(message["content"])
             
