@@ -29,32 +29,32 @@ def get_chunks_and_embeddings():
     embeddings = np.load('embeddings.npy')
     return chunks, embeddings
     
-def expand_to_full_sentence(chunks, index):
-    current = chunks[index]
-    prev = chunks[index - 1] if index > 0 else ''
-    next_ = chunks[index + 1] if index < len(chunks) - 1 else ''
+# def expand_to_full_sentence(chunks, index):
+#     current = chunks[index]
+#     prev = chunks[index - 1] if index > 0 else ''
+#     next_ = chunks[index + 1] if index < len(chunks) - 1 else ''
 
-    combined = prev + current + next_
-    start_idx = len(prev)
+#     combined = prev + current + next_
+#     start_idx = len(prev)
 
-    # Scan forward for end
-    match = list(re.finditer(r"[.!?]", next_))
-    if len(match) > 0:
-        index = match[0].start()
-        print("First punctuation found at index:", index)
-        combined = current + next_[0:index+1]
-    else:
-        combined = current
-    # scan backward for start
-    matches = list(re.finditer(r"[.!?]", prev))
-    if len(matches) > 0:
-        last_match = matches[-1]
-        index = last_match.start()
-        combined = prev[index+2:] + combined
-    else:
-        combined = current
+#     # Scan forward for end
+#     match = list(re.finditer(r"[.!?]", next_))
+#     if len(match) > 0:
+#         index = match[0].start()
+#         print("First punctuation found at index:", index)
+#         combined = current + next_[0:index+1]
+#     else:
+#         combined = current
+#     # scan backward for start
+#     matches = list(re.finditer(r"[.!?]", prev))
+#     if len(matches) > 0:
+#         last_match = matches[-1]
+#         index = last_match.start()
+#         combined = prev[index+2:] + combined
+#     else:
+#         combined = current
 
-    return combined
+#     return combined
 # Session ID
 if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
@@ -188,8 +188,8 @@ if st.session_state["MODEL_CHOSEN"] == True:
             top_indices = np.argsort(similarities)[::-1][:5]  # Indices of the top 10 similar chunks
             
             # Retrieve the top 10 most similar chunks based on the indices
-            # top_10_similar_chunks= [chunks[idx] for idx in top_indices]
-            top_10_similar_chunks = [expand_to_full_sentence(chunks, idx) for idx in top_indices]
+            top_10_similar_chunks= [chunks[idx] for idx in top_indices]
+            # top_10_similar_chunks = [expand_to_full_sentence(chunks, idx) for idx in top_indices]
     
             retrieved_context = "Answer based on the following context:\n" + "\n\n".join(top_10_similar_chunks)
     
