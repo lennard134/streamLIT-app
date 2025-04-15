@@ -29,32 +29,32 @@ def get_chunks_and_embeddings():
     embeddings = np.load('embeddings.npy')
     return chunks, embeddings
     
-# def expand_to_full_sentence(chunks, index):
-#     current = chunks[index]
-#     prev = chunks[index - 1] if index > 0 else ''
-#     next_ = chunks[index + 1] if index < len(chunks) - 1 else ''
+def expand_to_full_sentence(chunks, index):
+    current = chunks[index]
+    prev = chunks[index - 1] if index > 0 else ''
+    next_ = chunks[index + 1] if index < len(chunks) - 1 else ''
 
-#     combined = prev + current + next_
-#     start_idx = len(prev)
+    combined = prev + current + next_
+    start_idx = len(prev)
 
-#     # Scan forward for end
-#     match = list(re.finditer(r"[.!?]", next_))
-#     if len(match) > 0:
-#         index = match[0].start()
-#         print("First punctuation found at index:", index)
-#         combined = current + next_[0:index+1]
-#     else:
-#         combined = current
-#     # scan backward for start
-#     matches = list(re.finditer(r"[.!?]", prev))
-#     if len(matches) > 0:
-#         last_match = matches[-1]
-#         index = last_match.start()
-#         combined = prev[index+2:] + combined
-#     else:
-#         combined = current
+    # Scan forward for end
+    match = list(re.finditer(r"[.!?]", next_))
+    if len(match) > 0:
+        index = match[0].start()
+        print("First punctuation found at index:", index)
+        combined = current + next_[0:index+1]
+    else:
+        combined = current
+    # scan backward for start
+    matches = list(re.finditer(r"[.!?]", prev))
+    if len(matches) > 0:
+        last_match = matches[-1]
+        index = last_match.start()
+        combined = prev[index+2:] + combined
+    else:
+        combined = current
 
-#     return combined
+    return combined
 # Session ID
 if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
@@ -71,7 +71,7 @@ def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=
                 user_message,
                 model="intfloat/multilingual-e5-large-instruct"
             )
-            if question_embed is not None:
+            if question_embed is not None and len(question_embed) > 0:
                 return question_embed
             else:
                 retries += 1
@@ -101,7 +101,7 @@ def get_model_response(user_message, HF_client, model_name, max_retries=10, wait
                 ],
                 max_tokens=500,
             )
-            if completion is not None:
+            if completion is not None and len(completion) > 0:
                 return completion.choices[0].message.content
             else:
                 retries += 1
