@@ -13,10 +13,9 @@ col1, col2 = st.columns(2)
 
 # --- Session ID ---
 if 'session_id' not in st.session_state:
-    raw = f"{time.time()}_{random.randint(0, 1e6)}".encode()
-    st.session_state['session_id'] = hashlib.sha256(raw).hexdigest()[:16]
+    session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
+    st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
 
-# --- Load chunks & embeddings ---
 @st.cache_data
 def load_data():
     with open("chunks.pkl", "rb") as f:
