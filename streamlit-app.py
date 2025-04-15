@@ -1,358 +1,238 @@
-import re, time, random, hashlib, pickle, base64, requests
-import numpy as np
-import streamlit as st
-from scipy.spatial.distance import cosine
-from huggingface_hub import InferenceClient
-from streamlit_pdf_reader import pdf_reader
-from supabase import create_client
+import re
 import openai
+import hashlib
+import time
+import os
+import random
+import requests
+import tempfile
+import pickle 
+import base64
+import streamlit as st
+import numpy as np
+from scipy.spatial.distance import cosine
 
-# --- Config ---
+from supabase import create_client, Client
+from streamlit_pdf_reader import pdf_reader
+from huggingface_hub import InferenceClient
+
+
+# ---- Config ----
 st.set_page_config(layout="wide")
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([1, 1])  # Split screen
 
-# --- Session ID ---
+# ---- Set PDF File (Preloaded) ----
+@st.cache_data
+def get_chunks_and_embeddings():
+    with open("chunks.pkl", "rb") as f:
+        chunks = pickle.load(f)
+    embeddings = np.load('embeddings.npy')
+    return chunks, embeddings
+    
+def expand_to_full_sentence(chunks, index):
+    current = chunks[index]
+    prev = chunks[index - 1] if index > 0 else ''
+    next_ = chunks[index + 1] if index < len(chunks) - 1 else ''
+
+    combined = prev + current + next_
+    start_idx = len(prev)
+
+    # Scan forward for end
+    match = re.search(r"[.!?]", next_)
+    if match:
+        index = match.start()
+        print("First punctuation found at index:", index)
+        combined = current + next_[0:index+1]
+    else:
+        combined = current
+    # scan backward for start
+    matches = list(re.finditer(r"[.!?]", prev))
+    if matches:
+        last_match = matches[-1]
+        index = last_match.start()
+
+        
+        combined = prev[index+2:] + combined
+    else:
+        combined = current
+
+    return combined
+# Session ID
 if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
     st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
 
-@st.cache_data
-def load_data():
-    with open("chunks.pkl", "rb") as f:
-        chunks = pickle.load(f)
-    embeddings = np.load("embeddings.npy")
-    return chunks, embeddings
+# Load & cache resources
+chunks, embeddings = get_chunks_and_embeddings()
 
-chunks, embeddings = load_data()
-
-# --- Expand chunk to full sentence ---
-def expand_sentence(chunks, idx):
-    cur, prev, nxt = chunks[idx], chunks[idx-1] if idx > 0 else '', chunks[idx+1] if idx < len(chunks)-1 else ''
-    full = cur
-    if re.search(r"[.!?]", nxt): full += nxt[:re.search(r"[.!?]", nxt).end()]
-    if matches := list(re.finditer(r"[.!?]", prev)): full = prev[matches[-1].end():] + full
-    return full
-
-# --- Retry helper for HF requests ---
-def retry_request(fn, *args, max_retries=5, wait=1, **kwargs):
-    for attempt in range(max_retries):
+def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=1):
+    retries = 0
+    while retries < max_retries:
         try:
-            result = fn(*args, **kwargs)
-            if result: return result
-        except requests.RequestException as e:
-            print(f"Retry {attempt+1}: {e}")
-        time.sleep(wait * (2 ** attempt))
+            question_embed = HF_client.feature_extraction(
+                user_message,
+                model="intfloat/multilingual-e5-large-instruct"
+            )
+            if question_embed is not None:
+                return question_embed
+            else:
+                retries += 1
+                wait_time = wait_time * 2  # Exponentially increase wait time
+                print(f"Retrying... {retries}/{max_retries}")
+                time.sleep(wait_time)
+        
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed due to error: {e}")
+            retries += 1
+            wait_time = wait_time * 2  # Exponentially increase wait time
+            print(f"Retrying... {retries}/{max_retries}")
+            time.sleep(wait_time)
+    return None
+    
+def get_model_response(user_message, HF_client, model_name, max_retries=10, wait_time=1):
+    retries = 0
+    while retries < max_retries:
+        try:
+            completion = HF_client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": user_message
+                    }
+                ],
+                max_tokens=500,
+            )
+            if completion is not None:
+                return completion.choices[0].message.content
+            else:
+                retries += 1
+                wait_time = wait_time * 2  # Exponentially increase wait time
+                print(f"Retrying... {retries}/{max_retries}")
+                time.sleep(wait_time)
+        
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed due to error: {e}")
+            retries += 1
+            wait_time = wait_time * 2  # Exponentially increase wait time
+            print(f"Retrying... {retries}/{max_retries}")
+            time.sleep(wait_time)
+    
     return None
 
-# --- Sidebar: User ID & model selection ---
+# UI
+
 with st.sidebar:
-    user_id = st.text_input("Enter your ID (format: tr123)", "tr...")
+    user_input = st.text_input("Please insert your unique identifier", "tr...")
+
+    # Define the regular expression pattern for "tr" followed by exactly three digits
     pattern = r"^tr\d{3}$"
-    if not re.match(pattern, user_id):
-        st.warning("Use your ID from the Qualtrics environment (e.g., tr123)")
+    
+    if not re.match(pattern, user_input):
+        st.warning('Retrieve your ID from the qualtrics environment and insert here', icon="⚠️")
         st.session_state["MODEL_CHOSEN"] = False
     else:
-        uid = int(user_id.replace("tr", ""))
-        model = "meta-llama/Llama-3.2-3B-Instruct" if uid >= 100 else "meta-llama/Llama-3.2-1B-Instruct"
+        user_input = user_input.replace('tr', '')
+        user_input = int(user_input)
         st.session_state["MODEL_CHOSEN"] = True
-        if "messages" in st.session_state:
-            for msg in reversed(st.session_state["messages"]):
-                if msg["role"] == "RetrievedChunks":
-                    st.container(height=600).chat_message(msg["role"]).write(msg["content"])
-                    break
+        if user_input < 100:
+            model_name = "meta-llama/Llama-3.2-1B-Instruct"
+        elif 100 <= user_input < 500:
+            model_name = "meta-llama/Llama-3.2-3B-Instruct"
+        else:
+            model_name = "meta-llama/Llama-3.2-3B-Instruct"
+    context_box = st.container(height=600)
+    if "messages" in st.session_state:
+        for message in reversed(st.session_state["messages"]):
+            if message["role"] == "RetrievedChunks":
+                context_box.chat_message(message["role"]).write(message["content"])
+                break;
+                 
 
-# --- Main App ---
-if st.session_state.get("MODEL_CHOSEN"):
+             
+if st.session_state["MODEL_CHOSEN"] == True:
     with col1:
         st.header("💬 Chat with the PDF")
-        client = openai.OpenAI(api_key=st.secrets["TOGETHER_API_TOKEN"], base_url="https://api.together.xyz/v1")
-        supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
-        hf_client = InferenceClient(api_key=st.secrets["HF_API_TOKEN"])
-
-        st.session_state.setdefault("messages", [])
-        msg_box = st.container(height=600)
-        for msg in st.session_state["messages"]:
-            if msg["role"] != "RetrievedChunks":
-                msg_box.chat_message(msg["role"]).write(msg["content"])
-
-        user_msg = st.chat_input("Ask your question here")
-        if user_msg:
-            question_embed = retry_request(hf_client.feature_extraction, user_msg, model="intfloat/multilingual-e5-large-instruct")
-            sims = [1 - cosine(question_embed, emb) for emb in embeddings]
-            top_chunks = [expand_sentence(chunks, idx) for idx in np.argsort(sims)[::-1][:5]]
-            context = "\n\n".join(top_chunks)
-            prompt = f""" You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
+    
+        # Secrets
+        token = st.secrets["TOGETHER_API_TOKEN"]
+        url = st.secrets["SUPABASE_URL"]
+        key = st.secrets["SUPABASE_KEY"]
+        HF_TOKEN = st.secrets["HF_API_TOKEN"]
+        
+        client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
+        supabase_client: Client = create_client(url, key)
+        HF_client = InferenceClient(
+            provider="hf-inference",
+            api_key=HF_TOKEN,
+        )
+        if "messages" not in st.session_state:
+            st.session_state["messages"] = []
+    
+        # Display previous messages
+        messages_box = st.container(height=600)
+        for message in st.session_state["messages"]:
+            if len(st.session_state["messages"]) > 0:
+                if message["role"] != "RetrievedChunks":
+                    messages_box.chat_message(message["role"]).write(message["content"])
+            
+        # User Input
+        user_message = st.chat_input("Ask your question here")
+        if user_message:
+            # Embed user question
+            question_embed = get_embedding_with_retry(user_message, HF_client)
+            
+            similarities = []
+            for chunk_embedding in embeddings:
+                similarity = 1 - cosine(question_embed, chunk_embedding)
+                similarities.append(similarity)
+    
+            top_indices = np.argsort(similarities)[::-1][:5]  # Indices of the top 10 similar chunks
+            
+            # Retrieve the top 10 most similar chunks based on the indices
+            # top_10_similar_chunks= [chunks[idx] for idx in top_indices]
+            top_10_similar_chunks = [expand_to_full_sentence(chunks, idx) for idx in top_indices]
+    
+            retrieved_context = "Answer based on the following context:\n" + "\n\n".join(top_10_similar_chunks)
+    
+            # retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
+            st.session_state.messages.append({"role": "user", "content": user_message})
+            if "messages" in st.session_state:  
+                last_message = st.session_state.messages[-1]
+                print(f'Last message: {last_message}')
+            else:
+                last_message = ''
+            
+            custom_prompt = f"""
+                            You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
                             Your role is to:
                             1. Answer questions by the user using the provided retrieved documents.
                             2. Never generate information beyond what is retrieved from the document.
                             3. Use information provided by the user
-
-Context:
-{context}
-
-User: {user_msg}
-Previous assistant message: {st.session_state["messages"][-1]["content"] if st.session_state["messages"] else ""}
-Answer:"""
-
-            answer = retry_request(
-                client.chat.completions.create,
-                model=model,
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=500
-            ).choices[0].message.content
-
-            st.session_state["messages"] += [
-                {"role": "user", "content": user_msg},
-                {"role": "RetrievedChunks", "content": "Answer based on:\n" + context},
-                {"role": "assistant", "content": answer}
-            ]
-
-            supabase.table("testEnvironment").insert({
-                "session_id": st.session_state["session_id"],
-                "Question": user_msg,
-                "Answer": answer
+                            Inputs:
+                            - Retrieved Context: {retrieved_context}
+                            - User Question: {user_message}
+                            - Assitant previous response: {last_message}
+                            Provide a constructive response that is to the point and as concise as possible. Answer only based on the information retrieved from the document and given by the detective.                        
+                        """         
+            response_text = get_model_response(custom_prompt, HF_client, model_name)
+            st.session_state.messages.append({"role": "RetrievedChunks", "content": retrieved_context})
+            st.session_state.messages.append({"role": "assistant", "content": response_text})
+    
+            # Save to Supabase
+            supabase_client.table("testEnvironment").insert({
+                "session_id": st.session_state.session_id,
+                "Question": user_message,
+                "Answer": response_text
             }).execute()
+    
             st.rerun()
+            
     with col2:
         pdf_reader("airplaneNoImage.pdf")
 else:
-    col1.write("Please fill in your ID on the sidebar")
-    col2.write("Please fill in your ID on the sidebar")
-# import re
-# import openai
-# import hashlib
-# import time
-# import os
-# import random
-# import requests
-# import tempfile
-# import pickle 
-# import base64
-# import streamlit as st
-# import numpy as np
-# from scipy.spatial.distance import cosine
-
-# from supabase import create_client, Client
-# from streamlit_pdf_reader import pdf_reader
-# from huggingface_hub import InferenceClient
-
-
-# # ---- Config ----
-# st.set_page_config(layout="wide")
-# col1, col2 = st.columns([1, 1])  # Split screen
-
-# # ---- Set PDF File (Preloaded) ----
-# @st.cache_data
-# def get_chunks_and_embeddings():
-#     with open("chunks.pkl", "rb") as f:
-#         chunks = pickle.load(f)
-#     embeddings = np.load('embeddings.npy')
-#     return chunks, embeddings
-    
-# def expand_to_full_sentence(chunks, index):
-#     current = chunks[index]
-#     prev = chunks[index - 1] if index > 0 else ''
-#     next_ = chunks[index + 1] if index < len(chunks) - 1 else ''
-
-#     combined = prev + current + next_
-#     start_idx = len(prev)
-
-#     # Scan forward for end
-#     match = re.search(r"[.!?]", next_)
-#     if match:
-#         index = match.start()
-#         print("First punctuation found at index:", index)
-#         combined = current + next_[0:index+1]
-#     else:
-#         combined = current
-#     # scan backward for start
-#     matches = list(re.finditer(r"[.!?]", prev))
-#     if matches:
-#         last_match = matches[-1]
-#         index = last_match.start()
-
-        
-#         combined = prev[index+2:] + combined
-#     else:
-#         combined = current
-
-#     return combined
-# # Session ID
-# if 'session_id' not in st.session_state:
-#     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
-#     st.session_state['session_id'] = hashlib.sha256(session_data).hexdigest()[:16]
-
-# # Load & cache resources
-# chunks, embeddings = get_chunks_and_embeddings()
-
-# def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=1):
-#     retries = 0
-#     while retries < max_retries:
-#         try:
-#             question_embed = HF_client.feature_extraction(
-#                 user_message,
-#                 model="intfloat/multilingual-e5-large-instruct"
-#             )
-#             if question_embed is not None:
-#                 return question_embed
-#             else:
-#                 retries += 1
-#                 wait_time = wait_time * 2  # Exponentially increase wait time
-#                 print(f"Retrying... {retries}/{max_retries}")
-#                 time.sleep(wait_time)
-        
-#         except requests.exceptions.RequestException as e:
-#             print(f"Request failed due to error: {e}")
-#             retries += 1
-#             wait_time = wait_time * 2  # Exponentially increase wait time
-#             print(f"Retrying... {retries}/{max_retries}")
-#             time.sleep(wait_time)
-#     return None
-    
-# def get_model_response(user_message, HF_client, model_name, max_retries=10, wait_time=1):
-#     retries = 0
-#     while retries < max_retries:
-#         try:
-#             completion = HF_client.chat.completions.create(
-#                 model=model_name,
-#                 messages=[
-#                     {
-#                         "role": "user",
-#                         "content": user_message
-#                     }
-#                 ],
-#                 max_tokens=500,
-#             )
-#             if completion is not None:
-#                 return completion.choices[0].message.content
-#             else:
-#                 retries += 1
-#                 wait_time = wait_time * 2  # Exponentially increase wait time
-#                 print(f"Retrying... {retries}/{max_retries}")
-#                 time.sleep(wait_time)
-        
-#         except requests.exceptions.RequestException as e:
-#             print(f"Request failed due to error: {e}")
-#             retries += 1
-#             wait_time = wait_time * 2  # Exponentially increase wait time
-#             print(f"Retrying... {retries}/{max_retries}")
-#             time.sleep(wait_time)
-    
-#     return None
-
-# # UI
-
-# with st.sidebar:
-#     user_input = st.text_input("Please insert your unique identifier", "tr...")
-
-#     # Define the regular expression pattern for "tr" followed by exactly three digits
-#     pattern = r"^tr\d{3}$"
-    
-#     if not re.match(pattern, user_input):
-#         st.warning('Retrieve your ID from the qualtrics environment and insert here', icon="⚠️")
-#         st.session_state["MODEL_CHOSEN"] = False
-#     else:
-#         user_input = user_input.replace('tr', '')
-#         user_input = int(user_input)
-#         st.session_state["MODEL_CHOSEN"] = True
-#         if user_input < 100:
-#             model_name = "meta-llama/Llama-3.2-1B-Instruct"
-#         elif 100 <= user_input < 500:
-#             model_name = "meta-llama/Llama-3.2-3B-Instruct"
-#         else:
-#             model_name = "meta-llama/Llama-3.2-3B-Instruct"
-#     context_box = st.container(height=600)
-#     if "messages" in st.session_state:
-#         for message in reversed(st.session_state["messages"]):
-#             if message["role"] == "RetrievedChunks":
-#                 context_box.chat_message(message["role"]).write(message["content"])
-#                 break;
-                 
-
-             
-# if st.session_state["MODEL_CHOSEN"] == True:
-#     with col1:
-#         st.header("💬 Chat with the PDF")
-    
-#         # Secrets
-#         token = st.secrets["TOGETHER_API_TOKEN"]
-#         url = st.secrets["SUPABASE_URL"]
-#         key = st.secrets["SUPABASE_KEY"]
-#         HF_TOKEN = st.secrets["HF_API_TOKEN"]
-        
-#         client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
-#         supabase_client: Client = create_client(url, key)
-#         HF_client = InferenceClient(
-#             provider="hf-inference",
-#             api_key=HF_TOKEN,
-#         )
-#         if "messages" not in st.session_state:
-#             st.session_state["messages"] = []
-    
-#         # Display previous messages
-#         messages_box = st.container(height=600)
-#         for message in st.session_state["messages"]:
-#             if len(st.session_state["messages"]) > 0:
-#                 if message["role"] != "RetrievedChunks":
-#                     messages_box.chat_message(message["role"]).write(message["content"])
-            
-#         # User Input
-#         user_message = st.chat_input("Ask your question here")
-#         if user_message:
-#             # Embed user question
-#             question_embed = get_embedding_with_retry(user_message, HF_client)
-            
-#             similarities = []
-#             for chunk_embedding in embeddings:
-#                 similarity = 1 - cosine(question_embed, chunk_embedding)
-#                 similarities.append(similarity)
-    
-#             top_indices = np.argsort(similarities)[::-1][:5]  # Indices of the top 10 similar chunks
-            
-#             # Retrieve the top 10 most similar chunks based on the indices
-#             # top_10_similar_chunks= [chunks[idx] for idx in top_indices]
-#             top_10_similar_chunks = [expand_to_full_sentence(chunks, idx) for idx in top_indices]
-    
-#             retrieved_context = "Answer based on the following context:\n" + "\n\n".join(top_10_similar_chunks)
-    
-#             # retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
-#             st.session_state.messages.append({"role": "user", "content": user_message})
-#             if "messages" in st.session_state:  
-#                 last_message = st.session_state.messages[-1]
-#                 print(f'Last message: {last_message}')
-#             else:
-#                 last_message = ''
-            
-#             custom_prompt = f"""
-#                             You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
-#                             Your role is to:
-#                             1. Answer questions by the user using the provided retrieved documents.
-#                             2. Never generate information beyond what is retrieved from the document.
-#                             3. Use information provided by the user
-#                             Inputs:
-#                             - Retrieved Context: {retrieved_context}
-#                             - User Question: {user_message}
-#                             - Assitant previous response: {last_message}
-#                             Provide a constructive response that is to the point and as concise as possible. Answer only based on the information retrieved from the document and given by the detective.                        
-#                         """         
-#             response_text = get_model_response(custom_prompt, HF_client, model_name)
-#             st.session_state.messages.append({"role": "RetrievedChunks", "content": retrieved_context})
-#             st.session_state.messages.append({"role": "assistant", "content": response_text})
-    
-#             # Save to Supabase
-#             supabase_client.table("testEnvironment").insert({
-#                 "session_id": st.session_state.session_id,
-#                 "Question": user_message,
-#                 "Answer": response_text
-#             }).execute()
-    
-#             st.rerun()
-            
-#     with col2:
-#         pdf_reader("airplaneNoImage.pdf")
-# else:
-#     with col1:
-#         st.write("Please fill in your ID on the sidebar")
-#     with col2:
-#         st.write("Please fill in your ID on the sidebar")
+    with col1:
+        st.write("Please fill in your ID on the sidebar")
+    with col2:
+        st.write("Please fill in your ID on the sidebar")
         
