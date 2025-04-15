@@ -142,11 +142,12 @@ with st.sidebar:
         else:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
     context_box = st.container(height=450)
-    for message in reversed(st.session_state["messages"]):
-        if message["role"] == "RetrievedChunks":
-            context_box.chat_message(message["role"]).write(message["content"])
-            break;
-             
+    if "messages" in st.session_state:
+        for message in reversed(st.session_state["messages"]):
+            if message["role"] == "RetrievedChunks":
+                context_box.chat_message(message["role"]).write(message["content"])
+                break;
+                 
 
              
 if st.session_state["MODEL_CHOSEN"] == True:
@@ -171,8 +172,9 @@ if st.session_state["MODEL_CHOSEN"] == True:
         # Display previous messages
         messages_box = st.container(height=600)
         for message in st.session_state["messages"]:
-            if message["role"] != "RetrievedChunks":
-                messages_box.chat_message(message["role"]).write(message["content"])
+            if len(st.session_stage["messages"]) > 0:
+                if message["role"] != "RetrievedChunks":
+                    messages_box.chat_message(message["role"]).write(message["content"])
             
         # User Input
         user_message = st.chat_input("Ask your question here")
