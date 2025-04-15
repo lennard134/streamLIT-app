@@ -171,7 +171,8 @@ if st.session_state["MODEL_CHOSEN"] == True:
         # Display previous messages
         messages_box = st.container(height=600)
         for message in st.session_state["messages"]:
-            messages_box.chat_message(message["role"]).write(message["content"])
+            if message["role"] != "RetrievedChunks":
+                messages_box.chat_message(message["role"]).write(message["content"])
             
         # User Input
         user_message = st.chat_input("Ask your question here")
