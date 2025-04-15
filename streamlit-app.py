@@ -30,15 +30,15 @@ def get_chunks_and_embeddings():
     return chunks, embeddings
     
 def expand_to_full_sentence(chunks, index):
-    current = chunks[index]
+    urrent = chunks[index]
     prev = chunks[index - 1] if index > 0 else ''
     next_ = chunks[index + 1] if index < len(chunks) - 1 else ''
-
+    overlap = int(chunk_size * 0.05)
     combined = prev + current + next_
     start_idx = len(prev)
 
     # Scan forward for end
-    match = re.search(r"[.!?]", next_)
+    match = re.search(r"[.!?]", next_[(overlap)])
     if match:
         index = match.start()
         print("First punctuation found at index:", index)
@@ -47,7 +47,7 @@ def expand_to_full_sentence(chunks, index):
         combined = current
     # scan backward for start
     matches = list(re.finditer(r"[.!?]", prev))
-    if len(matches)>0:
+    if matches:
         last_match = matches[-1]
         index = last_match.start()
 
