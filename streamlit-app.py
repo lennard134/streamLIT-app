@@ -75,16 +75,16 @@ def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=
                 return question_embed
             else:
                 retries += 1
-                wait_time = wait_time * 2  # Exponentially increase wait time
+                wait_time = float(wait_time * 2)  # Exponentially increase wait time
                 print(f"Retrying... {retries}/{max_retries}")
-                # time.sleep(wait_time)
+                time.sleep(wait_time)
         
         except requests.exceptions.RequestException as e:
             print(f"Request failed due to error: {e}")
             retries += 1
-            wait_time = wait_time * 2  # Exponentially increase wait time
+            wait_time = float(wait_time * 2)
             print(f"Retrying... {retries}/{max_retries}")
-            # time.sleep(wait_time)
+            time.sleep(wait_time)
     return None
     
 def get_model_response(user_message, HF_client, model_name, max_retries=10, wait_time=1):
@@ -105,16 +105,16 @@ def get_model_response(user_message, HF_client, model_name, max_retries=10, wait
                 return completion.choices[0].message.content
             else:
                 retries += 1
-                wait_time = wait_time * 2  # Exponentially increase wait time
+                wait_time = float(wait_time * 2)  # Exponentially increase wait time
                 print(f"Retrying... {retries}/{max_retries}")
-                # time.sleep(wait_time)
+                time.sleep(wait_time)
         
         except requests.exceptions.RequestException as e:
             print(f"Request failed due to error: {e}")
             retries += 1
-            wait_time = wait_time * 2  # Exponentially increase wait time
+            wait_time = float(wait_time * 2)  # Exponentially increase wait time
             print(f"Retrying... {retries}/{max_retries}")
-            # time.sleep(wait_time)
+            time.sleep(wait_time)
     
     return None
 
