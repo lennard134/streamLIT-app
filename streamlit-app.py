@@ -47,11 +47,9 @@ def expand_to_full_sentence(chunks, index):
         combined = current
     # scan backward for start
     matches = list(re.finditer(r"[.!?]", prev))
-    if matches:
+    if len(matches) > 0:
         last_match = matches[-1]
         index = last_match.start()
-
-        
         combined = prev[index+2:] + combined
     else:
         combined = current
