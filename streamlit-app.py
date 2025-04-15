@@ -153,10 +153,14 @@ if st.session_state["MODEL_CHOSEN"] == True:
         key = st.secrets["SUPABASE_KEY"]
         HF_TOKEN = st.secrets["HF_API_TOKEN"]
         
-        client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
+        # client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
         supabase_client: Client = create_client(url, key)
-        HF_client = InferenceClient(
-            provider="hf-inference",
+        HF_client_LLM = InferenceClient(
+            provider="together",
+            api_key=HF_TOKEN,
+        )
+        HF_client_Feature = InferenceClient(
+            provider="sambanova",
             api_key=HF_TOKEN,
         )
         if "messages" not in st.session_state:
@@ -171,7 +175,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
         user_message = st.chat_input("Ask your question here")
         if user_message:
             # Embed user question
-            question_embed = get_embedding_with_retry(user_message, HF_client)
+            question_embed = get_embedding_with_retry(user_message, HF_client_Feature)
             
             similarities = []
             for chunk_embedding in embeddings:
@@ -206,7 +210,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
                             - Assitant previous response: {last_message}
                             Provide a constructive response that is to the point and as concise as possible. Answer only based on the information retrieved from the document and given by the detective.                        
                         """         
-            response_text = get_model_response(custom_prompt, HF_client, model_name)
+            response_text = get_model_response(custom_prompt, HF_client_LLM, model_name)
             st.session_state.messages.append({"role": "RetrievedChunks", "content": retrieved_context})
             st.session_state.messages.append({"role": "assistant", "content": response_text})
     
