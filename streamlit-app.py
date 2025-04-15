@@ -141,7 +141,7 @@ with st.sidebar:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
         else:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
-    context_box = st.container(height=450)
+    context_box = st.container(height=600)
     if "messages" in st.session_state:
         for message in reversed(st.session_state["messages"]):
             if message["role"] == "RetrievedChunks":
