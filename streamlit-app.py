@@ -38,18 +38,20 @@ def expand_to_full_sentence(chunks, index):
     start_idx = len(prev)
 
     # Scan forward for end
-    match = list(re.finditer(r"[.!?]", next_))
-    if match is not None and len(match) > 0:
-        index = match[0].start()
+    match = re.search(r"[.!?]", next_)
+    if match:
+        index = match.start()
         print("First punctuation found at index:", index)
         combined = current + next_[0:index+1]
     else:
         combined = current
     # scan backward for start
     matches = list(re.finditer(r"[.!?]", prev))
-    if matches is not None and len(matches) > 0:
+    if matches:
         last_match = matches[-1]
         index = last_match.start()
+
+        
         combined = prev[index+2:] + combined
     else:
         combined = current
@@ -71,18 +73,18 @@ def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=
                 user_message,
                 model="intfloat/multilingual-e5-large-instruct"
             )
-            if question_embed is not None and len(question_embed) > 0:
+            if question_embed is not None:
                 return question_embed
             else:
                 retries += 1
-                wait_time = float(wait_time * 2)  # Exponentially increase wait time
+                wait_time = wait_time * 2  # Exponentially increase wait time
                 print(f"Retrying... {retries}/{max_retries}")
                 time.sleep(wait_time)
         
         except requests.exceptions.RequestException as e:
             print(f"Request failed due to error: {e}")
             retries += 1
-            wait_time = float(wait_time * 2)
+            wait_time = wait_time * 2  # Exponentially increase wait time
             print(f"Retrying... {retries}/{max_retries}")
             time.sleep(wait_time)
     return None
@@ -101,18 +103,18 @@ def get_model_response(user_message, HF_client, model_name, max_retries=10, wait
                 ],
                 max_tokens=500,
             )
-            if completion is not None and len(completion) > 0:
+            if completion is not None:
                 return completion.choices[0].message.content
             else:
                 retries += 1
-                wait_time = float(wait_time * 2)  # Exponentially increase wait time
+                wait_time = wait_time * 2  # Exponentially increase wait time
                 print(f"Retrying... {retries}/{max_retries}")
                 time.sleep(wait_time)
         
         except requests.exceptions.RequestException as e:
             print(f"Request failed due to error: {e}")
             retries += 1
-            wait_time = float(wait_time * 2)  # Exponentially increase wait time
+            wait_time = wait_time * 2  # Exponentially increase wait time
             print(f"Retrying... {retries}/{max_retries}")
             time.sleep(wait_time)
     
@@ -139,15 +141,8 @@ with st.sidebar:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
         else:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
-    context_box = st.container(height=450)
-    if "messages" in st.session_state:
-        for message in reversed(st.session_state["messages"]):
-            if message["role"] == "RetrievedChunks":
-                context_box.chat_message(message["role"]).write(message["content"])
-                break;
-                 
-
-             
+            
+    
 if st.session_state["MODEL_CHOSEN"] == True:
     with col1:
         st.header("💬 Chat with the PDF")
@@ -170,9 +165,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
         # Display previous messages
         messages_box = st.container(height=600)
         for message in st.session_state["messages"]:
-            if len(st.session_state["messages"]) > 0:
-                if message["role"] != "RetrievedChunks":
-                    messages_box.chat_message(message["role"]).write(message["content"])
+            messages_box.chat_message(message["role"]).write(message["content"])
             
         # User Input
         user_message = st.chat_input("Ask your question here")
@@ -188,8 +181,8 @@ if st.session_state["MODEL_CHOSEN"] == True:
             top_indices = np.argsort(similarities)[::-1][:5]  # Indices of the top 10 similar chunks
             
             # Retrieve the top 10 most similar chunks based on the indices
-            top_10_similar_chunks= [chunks[idx] for idx in top_indices]
-            # top_10_similar_chunks = [expand_to_full_sentence(chunks, idx) for idx in top_indices]
+            # top_10_similar_chunks= [chunks[idx] for idx in top_indices]
+            top_10_similar_chunks = [expand_to_full_sentence(chunks, idx) for idx in top_indices]
     
             retrieved_context = "Answer based on the following context:\n" + "\n\n".join(top_10_similar_chunks)
     
