@@ -134,7 +134,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
         )
         print("2")
         HF_client_Feature = InferenceClient(
-            provider="sambanova",
+            provider="hf-inference",
             api_key=HF_TOKEN,
         )
         if "messages" not in st.session_state:
