@@ -196,7 +196,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
                 "session_id": st.session_state.session_id,
                 "Question": user_message,
                 "Answer": response_text,
-                "LLM":model_name.
+                "LLM":model_name
             }).execute()
     
             st.rerun()
