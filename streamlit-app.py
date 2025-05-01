@@ -1,3 +1,4 @@
+
 import re
 import openai
 import hashlib
@@ -10,8 +11,8 @@ import pickle
 import base64
 import streamlit as st
 import numpy as np
-
 from scipy.spatial.distance import cosine
+
 from supabase import create_client, Client
 from streamlit_pdf_reader import pdf_reader
 from huggingface_hub import InferenceClient
@@ -109,6 +110,7 @@ with st.sidebar:
         st.session_state["MODEL_CHOSEN"] = True
         if user_input < 100:
             model_name = "meta-llama/Llama-3.2-1B-Instruct"
+
         elif 100 <= user_input < 500:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
         else:
@@ -124,7 +126,6 @@ if st.session_state["MODEL_CHOSEN"] == True:
         url = st.secrets["SUPABASE_URL"]
         key = st.secrets["SUPABASE_KEY"]
         HF_TOKEN = st.secrets["HF_API_TOKEN"]
-        # GOOGLE_API_TOKEN = st.secrets["GEMMA_TOKEN"]
         
         # client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
 
@@ -133,6 +134,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
             provider="sambanova",
             api_key=HF_TOKEN,
         )
+
         HF_client_Feature = InferenceClient(
             provider="hf-inference",
             api_key=HF_TOKEN,
