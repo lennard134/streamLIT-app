@@ -10,8 +10,8 @@ import pickle
 import base64
 import streamlit as st
 import numpy as np
-from scipy.spatial.distance import cosine
 
+from scipy.spatial.distance import cosine
 from supabase import create_client, Client
 from streamlit_pdf_reader import pdf_reader
 from huggingface_hub import InferenceClient
