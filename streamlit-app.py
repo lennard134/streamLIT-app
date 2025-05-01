@@ -109,7 +109,6 @@ with st.sidebar:
         st.session_state["MODEL_CHOSEN"] = True
         if user_input < 100:
             model_name = "meta-llama/Llama-3.2-1B-Instruct"
-
         elif 100 <= user_input < 500:
             model_name = "meta-llama/Llama-3.2-3B-Instruct"
         else:
@@ -134,8 +133,6 @@ if st.session_state["MODEL_CHOSEN"] == True:
             provider="sambanova",
             api_key=HF_TOKEN,
         )
-        # HF_client_LLM = genai.Client(api_key=GOOGLE_API_TOKEN)
-
         HF_client_Feature = InferenceClient(
             provider="hf-inference",
             api_key=HF_TOKEN,
