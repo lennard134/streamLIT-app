@@ -126,13 +126,13 @@ if st.session_state["MODEL_CHOSEN"] == True:
         HF_TOKEN = st.secrets["HF_API_TOKEN"]
         
         # client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
-        print("1")
+
         supabase_client: Client = create_client(url, key)
         HF_client_LLM = InferenceClient(
             provider="together",
             api_key=HF_TOKEN,
         )
-        print("2")
+
         HF_client_Feature = InferenceClient(
             provider="hf-inference",
             api_key=HF_TOKEN,
@@ -141,7 +141,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
             st.session_state["messages"] = []
     
         # Display previous messages
-        print("3")
+
         messages_box = st.container(height=600)
         for message in st.session_state["messages"]:
             messages_box.chat_message(message["role"]).write(message["content"])
@@ -150,25 +150,21 @@ if st.session_state["MODEL_CHOSEN"] == True:
         user_message = st.chat_input("Ask your question here")
         if user_message:
             # Embed user question
-            print("4")
             question_embed = get_embedding_with_retry(user_message, HF_client_Feature)
-            print("5")
             similarities = []
             for chunk_embedding in embeddings:
                 similarity = 1 - cosine(question_embed, chunk_embedding)
                 similarities.append(similarity)
-            print("6")
+
             top_indices = np.argsort(similarities)[::-1][:5]  # Indices of the top 10 similar chunks
             
             # Retrieve the top 10 most similar chunks based on the indices
             top_10_similar_chunks= [chunks[idx] for idx in top_indices]
             # top_10_similar_chunks = [expand_to_full_sentence(chunks, idx) for idx in top_indices]
-            print("7")
             retrieved_context = "Answer based on the following context:\n" + "\n\n".join(top_10_similar_chunks)
     
             # retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
             st.session_state.messages.append({"role": "user", "content": user_message})
-            print("8")
             if "messages" in st.session_state:  
                 last_message = st.session_state.messages[-1]
                 print(f'Last message: {last_message}')
@@ -190,7 +186,6 @@ if st.session_state["MODEL_CHOSEN"] == True:
             response_text = get_model_response(custom_prompt, HF_client_LLM, model_name)
             st.session_state.messages.append({"role": "RetrievedChunks", "content": retrieved_context})
             st.session_state.messages.append({"role": "assistant", "content": response_text})
-            print("9")
             # Save to Supabase
             supabase_client.table("testEnvironment").insert({
                 "session_id": st.session_state.session_id,
@@ -200,7 +195,6 @@ if st.session_state["MODEL_CHOSEN"] == True:
             }).execute()
     
             st.rerun()
-            print("10")
     with col2:
         pdf_reader("airplaneNoImage.pdf")
 else:
