@@ -8,7 +8,6 @@ import requests
 import tempfile
 import pickle 
 import base64
-from google import genai
 import streamlit as st
 import numpy as np
 from scipy.spatial.distance import cosine
