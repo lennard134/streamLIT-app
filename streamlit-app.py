@@ -66,24 +66,18 @@ def get_model_response(user_message, HF_client, model_name, max_retries=10, wait
     retries = 0
     while retries < max_retries:
         try:
-            # completion = HF_client.chat.completions.create(
-            #     model=model_name,
-            #     messages=[
-            #         {
-            #             "role": "user",
-            #             "content": user_message
-            #         }
-            #     ],
-            #     max_tokens=500,
-            # )
-            completion = HF_client.models.generate_content(
-                model="gemma-3-27b-it",
-                contents=user_message,
+            completion = HF_client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": user_message
+                    }
+                ],
+                max_tokens=500,
             )
-            # print(completion.text)
             if completion is not None:
-                return completion.text
-                # return completion.choices[0].message.content
+                return completion.choices[0].message.content
             else:
                 retries += 1
                 wait_time = wait_time * 2  # Exponentially increase wait time
@@ -132,16 +126,16 @@ if st.session_state["MODEL_CHOSEN"] == True:
         url = st.secrets["SUPABASE_URL"]
         key = st.secrets["SUPABASE_KEY"]
         HF_TOKEN = st.secrets["HF_API_TOKEN"]
-        GOOGLE_API_TOKEN = st.secrets["GEMMA_TOKEN"]
+        # GOOGLE_API_TOKEN = st.secrets["GEMMA_TOKEN"]
         
         # client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
 
         supabase_client: Client = create_client(url, key)
-        # HF_client_LLM = InferenceClient(
-        #     provider="sambanova",
-        #     api_key=HF_TOKEN,
-        # )
-        HF_client_LLM = genai.Client(api_key=GOOGLE_API_TOKEN)
+        HF_client_LLM = InferenceClient(
+            provider="sambanova",
+            api_key=HF_TOKEN,
+        )
+        # HF_client_LLM = genai.Client(api_key=GOOGLE_API_TOKEN)
 
         HF_client_Feature = InferenceClient(
             provider="hf-inference",
