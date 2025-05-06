@@ -44,7 +44,7 @@ def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=
         try:
             question_embed = HF_client.feature_extraction(
                 user_message,
-                model="intfloat/multilingual-e5-large-instruct"
+                model="intfloat/multilingual-e5-large"#"intfloat/multilingual-e5-large-instruct"
             )
             if question_embed is not None:
                 return question_embed
