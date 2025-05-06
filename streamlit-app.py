@@ -60,7 +60,8 @@ def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=
             wait_time = wait_time * 2  # Exponentially increase wait time
             print(f"Retrying... {retries}/{max_retries}")
             time.sleep(wait_time)
-    return None
+    out = 'Bad Request: Please try again'
+    return out
     
 def get_model_response(user_message, HF_client, model_name, max_retries=10, wait_time=1):
     retries = 0
@@ -91,7 +92,8 @@ def get_model_response(user_message, HF_client, model_name, max_retries=10, wait
             print(f"Retrying... {retries}/{max_retries}")
             time.sleep(wait_time)
     
-    return None
+    out = 'Bad Request: Please try again'
+    return out
 
 # UI
 
