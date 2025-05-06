@@ -118,7 +118,7 @@ with st.sidebar:
     
 if st.session_state["MODEL_CHOSEN"] == True:
     with col1:
-        st.header("💬 Chat with the PDF")
+        st.header("💬 Assistant")
     
         # Secrets
         token = st.secrets["TOGETHER_API_TOKEN"]
