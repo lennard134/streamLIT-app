@@ -109,12 +109,11 @@ with st.sidebar:
         user_input = int(user_input)
         st.session_state["MODEL_CHOSEN"] = True
         if user_input < 100:
-            model_name = "meta-llama/Llama-3.2-1B-Instruct"
-
+            model_name = "google/gemma-2-2b-it"#"meta-llama/Llama-3.2-1B-Instruct"
         elif 100 <= user_input < 500:
-            model_name = "meta-llama/Llama-3.2-3B-Instruct"
+            model_name = "google/gemma-2-9b-it"#"meta-llama/Llama-3.2-3B-Instruct"
         else:
-            model_name = "meta-llama/Llama-3.2-3B-Instruct"
+            model_name = "google/gemma-2-27b-it"#"meta-llama/Llama-3.2-3B-Instruct"
             
     
 if st.session_state["MODEL_CHOSEN"] == True:
@@ -131,7 +130,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
 
         supabase_client: Client = create_client(url, key)
         HF_client_LLM = InferenceClient(
-            provider="sambanova",
+            provider="nebius",
             api_key=HF_TOKEN,
         )
 
