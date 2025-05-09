@@ -131,7 +131,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
         HF_TOKEN = st.secrets["HF_API_TOKEN"]
         
         # client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
-        client_together = Together()
+        client_together = Together(token)
 
         supabase_client: Client = create_client(url, key)
         HF_client_LLM = InferenceClient(
