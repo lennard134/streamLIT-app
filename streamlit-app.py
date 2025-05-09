@@ -154,6 +154,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
         if user_message:
             # Embed user question
             question_embed = get_embedding_with_retry(user_message, HF_client_Feature)
+            print(f'question embedded:{question_embed}')
             similarities = []
             for chunk_embedding in embeddings:
                 similarity = 1 - cosine(question_embed, chunk_embedding)
