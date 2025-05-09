@@ -11,6 +11,8 @@ import pickle
 import base64
 import streamlit as st
 import numpy as np
+from together import Together
+
 from scipy.spatial.distance import cosine
 
 from supabase import create_client, Client
@@ -123,12 +125,13 @@ if st.session_state["MODEL_CHOSEN"] == True:
         st.header("💬 Assistant")
     
         # Secrets
-        # token = st.secrets["TOGETHER_API_TOKEN"]
+        token = st.secrets["TOGETHER_API_TOKEN"]
         url = st.secrets["SUPABASE_URL"]
         key = st.secrets["SUPABASE_KEY"]
         HF_TOKEN = st.secrets["HF_API_TOKEN"]
         
         # client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
+        client_together = Together()
 
         supabase_client: Client = create_client(url, key)
         HF_client_LLM = InferenceClient(
@@ -140,6 +143,12 @@ if st.session_state["MODEL_CHOSEN"] == True:
             provider="hf-inference",
             api_key=HF_TOKEN,
         )
+        response = client.chat.completions.create(
+            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+            messages=[{"role": "user", "content": "What are some fun things to do in New York?"}],
+        )
+        st.session_state.messages.append({"role": "user", "content": response.choices[0].message.content})
+
         if "messages" not in st.session_state:
             st.session_state["messages"] = []
     
