@@ -44,7 +44,7 @@ def get_embedding_with_retry(user_message, HF_client, max_retries=10, wait_time=
         try:
             question_embed = HF_client.feature_extraction(
                 user_message,
-                model="google/canine-s",#"intfloat/multilingual-e5-large",#"intfloat/multilingual-e5-large-instruct"
+                model="intfloat/multilingual-e5-large-instruct",
             )
             if question_embed is not None:
                 return question_embed
@@ -123,7 +123,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
         st.header("💬 Assistant")
     
         # Secrets
-        token = st.secrets["TOGETHER_API_TOKEN"]
+        # token = st.secrets["TOGETHER_API_TOKEN"]
         url = st.secrets["SUPABASE_URL"]
         key = st.secrets["SUPABASE_KEY"]
         HF_TOKEN = st.secrets["HF_API_TOKEN"]
