@@ -38,7 +38,7 @@ if 'session_id' not in st.session_state:
 
 # Load & cache resources
 chunks, embeddings = get_chunks_and_embeddings()
-
+#test comment
 def get_embedding_with_retry(user_message, HF_client, max_retries=2, wait_time=1):
     retries = 0
     while retries < max_retries:
