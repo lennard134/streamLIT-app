@@ -133,7 +133,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
 
         supabase_client: Client = create_client(url, key)
         HF_client_LLM = InferenceClient(
-            provider="nebius",
+            provider="together",
             api_key=HF_TOKEN,
         )
 
