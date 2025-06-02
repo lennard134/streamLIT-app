@@ -37,11 +37,6 @@ def load_embedding():
     model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
     return model
 
-df = load_data("https://github.com/plotly/datasets/raw/master/uber-rides-data1.csv")
-st.dataframe(df)
-
-st.button("Rerun")
-
 # Session ID
 if 'session_id' not in st.session_state:
     session_data = f"{time.time()}_{random.randint(0,int(1e6))}".encode()
