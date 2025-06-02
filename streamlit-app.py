@@ -11,7 +11,7 @@ import pickle
 import base64
 import streamlit as st
 import numpy as np
-
+from together import Together
 from scipy.spatial.distance import cosine
 from sentence_transformers import SentenceTransformer
 
