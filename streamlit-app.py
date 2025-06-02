@@ -163,12 +163,11 @@ if st.session_state["MODEL_CHOSEN"] == True:
             # Embed user question
             embed_model = load_embedding()
             question_embed = embed_model.encode(user_message)
-            print(f'question embedded:{question_embed}')
             similarities = []
             for chunk_embedding in embeddings:
                 similarity = 1 - cosine(question_embed, chunk_embedding)
                 similarities.append(similarity)
-
+            print('CALUCALUALUCALUCLUA')
             top_indices = np.argsort(similarities)[::-1][:5]  # Indices of the top 10 similar chunks
             
             # Retrieve the top 10 most similar chunks based on the indices
@@ -180,7 +179,6 @@ if st.session_state["MODEL_CHOSEN"] == True:
             st.session_state.messages.append({"role": "user", "content": user_message})
             if "messages" in st.session_state:  
                 last_message = st.session_state.messages[-1]
-                print(f'Last message: {last_message}')
             else:
                 last_message = ''
             
