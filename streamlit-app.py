@@ -127,6 +127,13 @@ with st.sidebar:
     
 if st.session_state["MODEL_CHOSEN"] == True:
     with col1:
+        client = Together()
+    
+        response = client.chat.completions.create(
+            model="meta-llama/Llama-Vision-Free",
+            messages=[{"role": "user", "content": "What are some fun things to do in New York?"}],
+        )
+        st.write(response.choices[0].message.content)
         st.header("💬 Assistant")
     
         # Secrets
@@ -210,15 +217,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
         pdf_reader("airplaneNoImage.pdf")
 else:
     with col1:
-        client = Together()
-    
-        response = client.chat.completions.create(
-            model="meta-llama/Llama-Vision-Free",
-            messages=[{"role": "user", "content": "What are some fun things to do in New York?"}],
-        )
-        # print(response.choices[0].message.content)
         st.write("Please fill in your ID on the sidebar")
-        st.write(response.choices[0].message.content)
     with col2:
         st.write("Please fill in your ID on the sidebar")
         
