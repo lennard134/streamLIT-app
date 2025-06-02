@@ -95,5 +95,6 @@ typing-inspection==0.4.0
 typing_extensions==4.13.1
 tzdata==2025.2
 urllib3==2.3.0
+vertexai
 yarl==1.19.0
 zstandard==0.23.0
