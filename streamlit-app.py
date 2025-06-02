@@ -134,20 +134,8 @@ if st.session_state["MODEL_CHOSEN"] == True:
         url = st.secrets["SUPABASE_URL"]
         key = st.secrets["SUPABASE_KEY"]
         HF_TOKEN = st.secrets["HF_API_TOKEN"]    
-        client = openai.OpenAI(
-          api_key="TOGETHER_API_KEY",
-          base_url="https://api.together.xyz/v1",
-        )
-        response = client.chat.completions.create(
-          model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-          messages=[
-            {"role": "system", "content": "You are a travel agent. Be descriptive and helpful."},
-            {"role": "user", "content": "Tell me the top 3 things to do in San Francisco"},
-          ]
-        )
-
-        print(response.choices[0].message.content)
-        st.write(response.choices[0].message.content)
+     
+    
         # client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
 
         supabase_client: Client = create_client(url, key)
