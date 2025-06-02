@@ -13,6 +13,7 @@ import streamlit as st
 import numpy as np
 
 from scipy.spatial.distance import cosine
+from sentence_transformers import SentenceTransformer
 
 from supabase import create_client, Client
 from streamlit_pdf_reader import pdf_reader
@@ -30,6 +31,16 @@ def get_chunks_and_embeddings():
         chunks = pickle.load(f)
     embeddings = np.load('embeddings.npy')
     return chunks, embeddings
+    
+@st.cache_data  
+def load_embedding():
+    model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
+    return model
+
+df = load_data("https://github.com/plotly/datasets/raw/master/uber-rides-data1.csv")
+st.dataframe(df)
+
+st.button("Rerun")
 
 # Session ID
 if 'session_id' not in st.session_state:
@@ -63,7 +74,7 @@ def get_embedding_with_retry(user_message, HF_client, max_retries=2, wait_time=1
             time.sleep(wait_time)
     out = 'Bad Request: Please try again'
     return out
-    
+
 def get_model_response(user_message, HF_client, model_name, max_retries=2, wait_time=1):
     retries = 0
     while retries < max_retries:
@@ -137,10 +148,10 @@ if st.session_state["MODEL_CHOSEN"] == True:
             api_key=HF_TOKEN,
         )
 
-        HF_client_Feature = InferenceClient(
-            provider="hf-inference",
-            api_key=HF_TOKEN,
-        )
+        # HF_client_Feature = InferenceClient(
+        #     provider="hf-inference",
+        #     api_key=HF_TOKEN,
+        # )
 
         if "messages" not in st.session_state:
             st.session_state["messages"] = []
@@ -155,7 +166,8 @@ if st.session_state["MODEL_CHOSEN"] == True:
         user_message = st.chat_input("Ask your question here")
         if user_message:
             # Embed user question
-            question_embed = get_embedding_with_retry(user_message, HF_client_Feature)
+            embed_model = load_embedding()
+            question_embed = embed_model.encode(user_message)
             print(f'question embedded:{question_embed}')
             similarities = []
             for chunk_embedding in embeddings:
