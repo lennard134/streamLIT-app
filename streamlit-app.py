@@ -127,13 +127,7 @@ with st.sidebar:
     
 if st.session_state["MODEL_CHOSEN"] == True:
     with col1:
-        client = Together(token)
-    
-        response = client.chat.completions.create(
-            model="meta-llama/Llama-Vision-Free",
-            messages=[{"role": "user", "content": "What are some fun things to do in New York?"}],
-        )
-        st.write(response.choices[0].message.content)
+        
         st.header("💬 Assistant")
     
         # Secrets
@@ -141,7 +135,13 @@ if st.session_state["MODEL_CHOSEN"] == True:
         url = st.secrets["SUPABASE_URL"]
         key = st.secrets["SUPABASE_KEY"]
         HF_TOKEN = st.secrets["HF_API_TOKEN"]
-        
+        client = Together(token)
+    
+        response = client.chat.completions.create(
+            model="meta-llama/Llama-Vision-Free",
+            messages=[{"role": "user", "content": "What are some fun things to do in New York?"}],
+        )
+        st.write(response.choices[0].message.content)
         # client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
 
         supabase_client: Client = create_client(url, key)
