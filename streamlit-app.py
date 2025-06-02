@@ -127,7 +127,7 @@ with st.sidebar:
     
 if st.session_state["MODEL_CHOSEN"] == True:
     with col1:
-        client = Together()
+        client = Together(token)
     
         response = client.chat.completions.create(
             model="meta-llama/Llama-Vision-Free",
