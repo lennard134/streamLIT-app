@@ -1,6 +1,6 @@
 
 import re
-import openai
+from openai import OpenAI
 import hashlib
 import time
 import os
@@ -75,7 +75,7 @@ def get_model_response(user_message, HF_client, model_name, max_retries=2, wait_
         try:
             completion = HF_client.chat.completions.create(
                 model=model_name,
-                messages=[
+                essages=[
                     {
                         "role": "user",
                         "content": user_message
@@ -101,7 +101,7 @@ def get_model_response(user_message, HF_client, model_name, max_retries=2, wait_
     out = 'Bad Request: Please try again'
     return out
 
-# UI
+#UI
 
 with st.sidebar:
     user_input = st.text_input("Please insert your unique identifier", "tr...")
@@ -117,12 +117,14 @@ with st.sidebar:
         user_input = int(user_input)
         st.session_state["MODEL_CHOSEN"] = True
         if user_input < 100:
-            model_name = "google/gemma-2-2b-it"#"meta-llama/Llama-3.2-1B-Instruct"
+            model_name = "meta-llama/llama-3.2-3b-instruct" 
+            base_url = "https://router.huggingface.co/novita/v3/openai"   
         elif 100 <= user_input < 500:
-            model_name = "google/gemma-2-9b-it"#"meta-llama/Llama-3.2-3B-Instruct"
+            model_name = "meta-llama/Llama-3.1-8B-Instruct"
+            base_url = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1"
         else:
-            model_name = "google/gemma-2-27b-it"#"meta-llama/Llama-3.2-3B-Instruct"
-            
+            model_name = "meta-llama/Llama-3.1-8B-Instruct"
+            base_url = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1"
     
 if st.session_state["MODEL_CHOSEN"] == True:
     with col1:
@@ -143,7 +145,10 @@ if st.session_state["MODEL_CHOSEN"] == True:
             provider="together",
             api_key=HF_TOKEN,
         )
-
+        HF_client_LLM = OpenAI(
+            base_url=base_url,
+            api_key=HF_TOKEN,
+        )
         # HF_client_Feature = InferenceClient(
         #     provider="hf-inference",
         #     api_key=HF_TOKEN,
@@ -168,7 +173,6 @@ if st.session_state["MODEL_CHOSEN"] == True:
             for chunk_embedding in embeddings:
                 similarity = 1 - cosine(question_embed, chunk_embedding)
                 similarities.append(similarity)
-            print('CALUCALUALUCALUCLUA')
             top_indices = np.argsort(similarities)[::-1][:5]  # Indices of the top 10 similar chunks
             
             # Retrieve the top 10 most similar chunks based on the indices
