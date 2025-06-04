@@ -35,7 +35,10 @@ def get_chunks_and_embeddings():
 def load_embedding(user_message):
     model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
     return model.encode(user_message)
-    
+
+def query(API_URL, payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
 
 # Session ID
 if 'session_id' not in st.session_state:
@@ -45,14 +48,13 @@ if 'session_id' not in st.session_state:
 # Load & cache resources
 chunks, embeddings = get_chunks_and_embeddings()
 #test comment
-def get_embedding_with_retry(user_message, HF_client, max_retries=2, wait_time=1):
+def get_embedding_with_retry(user_message, API_URL, max_retries=2, wait_time=1):
     retries = 0
     while retries < max_retries:
         try:
-            question_embed = HF_client.feature_extraction(
-                user_message,
-                model="intfloat/multilingual-e5-large-instruct",
-            )
+            output = query(API_URL=API_URL,payload={
+                "inputs": user_message,
+            })
             if question_embed is not None:
                 return question_embed
             else:
@@ -139,19 +141,18 @@ if st.session_state["MODEL_CHOSEN"] == True:
         HF_TOKEN = st.secrets["HF_API_TOKEN"]    
      
         supabase_client: Client = create_client(url, key)
-        # HF_client_LLM = InferenceClient(
-        #     provider="together",
-        #     api_key=HF_TOKEN,
-        # )
+
         HF_client_LLM = OpenAI(
             base_url=base_url,
             api_key=HF_TOKEN,
         )
-        # HF_client_Feature = InferenceClient(
-        #     provider="hf-inference",
-        #     api_key=HF_TOKEN,
-        # )
-
+        
+        authorization = "Bearer " + HF_TOKEN
+        API_URL = "https://router.huggingface.co/hf-inference/models/intfloat/multilingual-e5-large-instruct/pipeline/feature-extraction"
+            headers = {
+                "Authorization": authorization,
+            }
+        
         if "messages" not in st.session_state:
             st.session_state["messages"] = []
     
@@ -165,7 +166,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
         user_message = st.chat_input("Ask your question here")
         if user_message:
             # Embed user question
-            question_embed = load_embedding(user_message)
+            question_embed = get_embedding_with_retry(user_message, API_URL)
             similarities = []
             for chunk_embedding in embeddings:
                 similarity = 1 - cosine(question_embed, chunk_embedding)
