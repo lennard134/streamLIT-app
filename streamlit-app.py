@@ -12,7 +12,6 @@ import base64
 import streamlit as st
 import numpy as np
 from scipy.spatial.distance import cosine
-from sentence_transformers import SentenceTransformer
 
 from supabase import create_client, Client
 from streamlit_pdf_reader import pdf_reader
@@ -30,11 +29,6 @@ def get_chunks_and_embeddings():
         chunks = pickle.load(f)
     embeddings = np.load('embeddings.npy')
     return chunks, embeddings
-    
-@st.cache_data  
-def load_embedding(user_message):
-    model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
-    return model.encode(user_message)
 
 def query(API_URL, payload):
     response = requests.post(API_URL, headers=headers, json=payload)
@@ -52,7 +46,7 @@ def get_embedding_with_retry(user_message, API_URL, max_retries=2, wait_time=1):
     retries = 0
     while retries < max_retries:
         try:
-            output = query(API_URL=API_URL,payload={
+            question_embed = query(API_URL=API_URL,payload={
                 "inputs": user_message,
             })
             if question_embed is not None:
