@@ -34,7 +34,7 @@ def get_chunks_and_embeddings():
 @st.cache_data  
 def load_embedding(user_message):
     model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
-    return embed_model.encode(user_message)
+    return model.encode(user_message)
     
 
 # Session ID
