@@ -34,7 +34,8 @@ def get_chunks_and_embeddings():
 @st.cache_data  
 def load_embedding():
     model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
-    return model
+    return embed_model.encode(user_message)
+    
 
 # Session ID
 if 'session_id' not in st.session_state:
@@ -137,9 +138,6 @@ if st.session_state["MODEL_CHOSEN"] == True:
         key = st.secrets["SUPABASE_KEY"]
         HF_TOKEN = st.secrets["HF_API_TOKEN"]    
      
-    
-        # client = openai.OpenAI(api_key=token, base_url="https://api.together.xyz/v1")
-
         supabase_client: Client = create_client(url, key)
         # HF_client_LLM = InferenceClient(
         #     provider="together",
@@ -167,8 +165,7 @@ if st.session_state["MODEL_CHOSEN"] == True:
         user_message = st.chat_input("Ask your question here")
         if user_message:
             # Embed user question
-            embed_model = load_embedding()
-            question_embed = embed_model.encode(user_message)
+            question_embed = load_embedding(user_message)
             similarities = []
             for chunk_embedding in embeddings:
                 similarity = 1 - cosine(question_embed, chunk_embedding)
