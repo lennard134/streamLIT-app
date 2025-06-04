@@ -120,8 +120,9 @@ with st.sidebar:
             model_name = "meta-llama/Llama-3.1-8B-Instruct"
             base_url = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1"
         else:
-            model_name = "meta-llama/Llama-3.1-8B-Instruct"
-            base_url = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1"
+            model_name = "meta-llama/Llama-3.3-70B-Instruct"
+            base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.3-70B-Instruct/v1"
+
     
 if st.session_state["MODEL_CHOSEN"] == True:
     with col1:
