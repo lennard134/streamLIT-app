@@ -149,9 +149,9 @@ if st.session_state["MODEL_CHOSEN"] == True:
         
         authorization = "Bearer " + HF_TOKEN
         API_URL = "https://router.huggingface.co/hf-inference/models/intfloat/multilingual-e5-large-instruct/pipeline/feature-extraction"
-            headers = {
-                "Authorization": authorization,
-            }
+        headers = {
+            "Authorization": authorization,
+        }
         
         if "messages" not in st.session_state:
             st.session_state["messages"] = []
