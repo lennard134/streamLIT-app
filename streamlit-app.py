@@ -42,7 +42,7 @@ if 'session_id' not in st.session_state:
 # Load & cache resources
 chunks, embeddings = get_chunks_and_embeddings()
 #test comment
-def get_embedding_with_retry(user_message, API_URL, max_retries=2, wait_time=1):
+def get_embedding_with_retry(user_message, API_URL, max_retries=5, wait_time=1):
     retries = 0
     while retries < max_retries:
         try:
@@ -66,7 +66,7 @@ def get_embedding_with_retry(user_message, API_URL, max_retries=2, wait_time=1):
     out = 'Bad Request: Please try again'
     return out
 
-def get_model_response(user_message, HF_client, model_name, max_retries=2, wait_time=1):
+def get_model_response(user_message, HF_client, model_name, max_retries=5, wait_time=1):
     retries = 0
     while retries < max_retries:
         try:
