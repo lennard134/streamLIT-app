@@ -75,7 +75,7 @@ def get_model_response(user_message, HF_client, model_name, max_retries=2, wait_
         try:
             completion = HF_client.chat.completions.create(
                 model=model_name,
-                essages=[
+                messages=[
                     {
                         "role": "user",
                         "content": user_message
