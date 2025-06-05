@@ -40,59 +40,61 @@ chunks, embeddings = get_chunks_and_embeddings()
 #test comment
 def get_embedding_with_retry(user_message, API_URL, max_retries=5, wait_time=2):
     retries = 0
-    while retries < max_retries:
-        try:
-            question_embed = query(API_URL=API_URL,payload={
-                "inputs": user_message,
-            })
-            if question_embed is not None:
-                return question_embed
-            else:
+    with st.spinner("Processing"):
+        while retries < max_retries:
+            try:
+                question_embed = query(API_URL=API_URL,payload={
+                    "inputs": user_message,
+                })
+                if question_embed is not None:
+                    return question_embed
+                else:
+                    retries += 1
+                    wait_time = wait_time + 2  # Exponentially increase wait time
+                    print(f"Retrying... {retries}/{max_retries}")
+                    time.sleep(wait_time)
+            
+            except requests.exceptions.RequestException as e:
+                print(f"Request failed due to error: {e}")
                 retries += 1
                 wait_time = wait_time + 2  # Exponentially increase wait time
                 print(f"Retrying... {retries}/{max_retries}")
                 time.sleep(wait_time)
-        
-        except requests.exceptions.RequestException as e:
-            print(f"Request failed due to error: {e}")
-            retries += 1
-            wait_time = wait_time + 2  # Exponentially increase wait time
-            print(f"Retrying... {retries}/{max_retries}")
-            time.sleep(wait_time)
-    out = 'Bad Request: Please try again'
-    return out
+        out = 'Bad Request: Please try again'
+        return out
 
 def get_model_response(user_message, HF_client, model_name, max_retries=5, wait_time=2):
     retries = 0
-    while retries < max_retries:
-        try:
-            completion = HF_client.chat.completions.create(
-                model=model_name,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": user_message
-                    }
-                ],
-                max_tokens=500,
-            )
-            if completion is not None:
-                return completion.choices[0].message.content
-            else:
+    with st.spinner("Processing"):
+        while retries < max_retries:
+            try:
+                completion = HF_client.chat.completions.create(
+                    model=model_name,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": user_message
+                        }
+                    ],
+                    max_tokens=500,
+                )
+                if completion is not None:
+                    return completion.choices[0].message.content
+                else:
+                    retries += 1
+                    wait_time = wait_time + 2  # Exponentially increase wait time
+                    print(f"Retrying... {retries}/{max_retries}")
+                    time.sleep(wait_time)
+            
+            except requests.exceptions.RequestException as e:
+                print(f"Request failed due to error: {e}")
                 retries += 1
                 wait_time = wait_time + 2  # Exponentially increase wait time
                 print(f"Retrying... {retries}/{max_retries}")
                 time.sleep(wait_time)
         
-        except requests.exceptions.RequestException as e:
-            print(f"Request failed due to error: {e}")
-            retries += 1
-            wait_time = wait_time + 2  # Exponentially increase wait time
-            print(f"Retrying... {retries}/{max_retries}")
-            time.sleep(wait_time)
-    
-    out = 'Bad Request: Please try again'
-    return out
+        out = 'Bad Request: Please try again'
+        return out
 
 #UI
 
