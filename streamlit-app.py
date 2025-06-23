@@ -115,15 +115,11 @@ with st.sidebar:
             model_name = "meta-llama/llama-3.2-3b-instruct" 
             base_url = "https://router.huggingface.co/novita/v3/openai"   
         elif 100 <= user_input < 500:
-            model_name = "meta-llama/llama-3.2-3b-instruct" 
-            base_url = "https://router.huggingface.co/novita/v3/openai"   
-            # model_name = "meta-llama/Llama-3.1-8B-Instruct"
-            # base_url = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1"
-        else:
-            model_name = "meta-llama/llama-3.2-3b-instruct" 
-            base_url = "https://router.huggingface.co/novita/v3/openai"   
-            # model_name = "meta-llama/Llama-3.3-70B-Instruct"
-            # base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.3-70B-Instruct/v1"
+            model_name = "meta-llama/Llama-3.1-8B-Instruct"
+            base_url = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1"
+        else:  
+            model_name = "meta-llama/Llama-3.3-70B-Instruct"
+            base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.3-70B-Instruct/v1"
 
     
 if st.session_state["MODEL_CHOSEN"] == True:
