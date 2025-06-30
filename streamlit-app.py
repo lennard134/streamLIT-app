@@ -1,4 +1,3 @@
-
 import re
 from openai import OpenAI
 import hashlib
@@ -98,115 +97,98 @@ def get_model_response(user_message, HF_client, model_name, max_retries=5, wait_
 
 #UI
 
-with st.sidebar:
-    user_input = st.text_input("Please insert your unique identifier", "tr...")
 
-    # Define the regular expression pattern for "tr" followed by exactly three digits
-    pattern = r"^tr\d{3}$"
-    
-    if not re.match(pattern, user_input):
-        st.warning('Retrieve your ID from the qualtrics environment and insert here', icon="⚠️")
-        st.session_state["MODEL_CHOSEN"] = False
-    else:
-        user_input = user_input.replace('tr', '')
-        user_input = int(user_input)
-        st.session_state["MODEL_CHOSEN"] = True
-        if user_input < 100:
-            model_name = "meta-llama/llama-3.2-3b-instruct" 
-            base_url = "https://router.huggingface.co/novita/v3/openai"   
-        elif 100 <= user_input < 500:
-            model_name = "meta-llama/Llama-3.1-8B-Instruct"
-            base_url = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1"
-        else:  
-            model_name = "meta-llama/Llama-3.3-70B-Instruct"
-            base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.3-70B-Instruct/v1"
+
+st.session_state["MODEL_CHOSEN"] = True
+
+model_name = "meta-llama/llama-3.2-3b-instruct" 
+base_url = "https://router.huggingface.co/novita/v3/openai"   
+
+# model_name = "meta-llama/Llama-3.1-8B-Instruct"
+# base_url = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1"
+
+# model_name = "meta-llama/Llama-3.3-70B-Instruct"
+# base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.3-70B-Instruct/v1"
 
     
-if st.session_state["MODEL_CHOSEN"] == True:
-    with col1:
-        
-        st.header("💬 Assistant")
+with col1:
     
-        # Secrets
-        TOGETHER_API_KEY = st.secrets["TOGETHER_API_TOKEN"]
-        url = st.secrets["SUPABASE_URL"]
-        key = st.secrets["SUPABASE_KEY"]
-        HF_TOKEN = st.secrets["HF_API_TOKEN"]    
-     
-        supabase_client: Client = create_client(url, key)
+    st.header("💬 Assistant")
 
-        HF_client_LLM = OpenAI(
-            base_url=base_url,
-            api_key=HF_TOKEN,
-        )
-        
-        authorization = "Bearer " + HF_TOKEN
-        API_URL = "https://router.huggingface.co/hf-inference/models/intfloat/multilingual-e5-large-instruct/pipeline/feature-extraction"
-        headers = {
-            "Authorization": authorization,
-        }
-        
-        if "messages" not in st.session_state:
-            st.session_state["messages"] = []
-    
-        # Display previous messages
+    # Secrets
+    TOGETHER_API_KEY = st.secrets["TOGETHER_API_TOKEN"]
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    HF_TOKEN = st.secrets["HF_API_TOKEN"]    
+ 
+    supabase_client: Client = create_client(url, key)
 
-        messages_box = st.container(height=600)
-        for message in st.session_state["messages"]:
-            messages_box.chat_message(message["role"]).write(message["content"])
-            
-        # User Input
-        user_message = st.chat_input("Ask your question here")
-        if user_message:
-            # Embed user question
-            question_embed = get_embedding_with_retry(user_message, API_URL)
-            similarities = []
-            for chunk_embedding in embeddings:
-                similarity = 1 - cosine(question_embed, chunk_embedding)
-                similarities.append(similarity)
-            top_indices = np.argsort(similarities)[::-1][:5]  # Indices of the top 10 similar chunks
-            
-            # Retrieve the top 10 most similar chunks based on the indices
-            top_10_similar_chunks= [chunks[idx] for idx in top_indices]
-            # top_10_similar_chunks = [expand_to_full_sentence(chunks, idx) for idx in top_indices]
-            retrieved_context = "Answer based on the following context:\n" + "\n\n".join(top_10_similar_chunks)
+    HF_client_LLM = OpenAI(
+        base_url=base_url,
+        api_key=HF_TOKEN,
+    )
     
-            # retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
-            st.session_state.messages.append({"role": "user", "content": user_message})
-            if "messages" in st.session_state:  
-                last_message = st.session_state.messages[-1]
-            else:
-                last_message = ''
-            
-            custom_prompt = f"""
-                            You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
-                            Your role is to:
-                            1. Answer questions by the user using the provided retrieved documents.
-                            2. Never generate information beyond what is retrieved from the document.
-                            3. Use information provided by the user
-                            Inputs:
-                            - Retrieved Context: {retrieved_context}
-                            - User Question: {user_message}
-                            - Assitant previous response: {last_message}
-                            Provide a constructive response that is to the point and as concise as possible. Answer only based on the information retrieved from the document and given by the detective.                        
-                        """         
-            response_text = get_model_response(custom_prompt, HF_client_LLM, model_name)
-            st.session_state.messages.append({"role": "RetrievedChunks", "content": retrieved_context})
-            st.session_state.messages.append({"role": "assistant", "content": response_text})
-            # Save to Supabase
-            supabase_client.table("testEnvironment").insert({
-                "session_id": st.session_state.session_id,
-                "Question": user_message,
-                "Answer": response_text,
-                "LLM":model_name
-            }).execute()
+    authorization = "Bearer " + HF_TOKEN
+    API_URL = "https://router.huggingface.co/hf-inference/models/intfloat/multilingual-e5-large-instruct/pipeline/feature-extraction"
+    headers = {
+        "Authorization": authorization,
+    }
     
-            st.rerun()
-    with col2:
-        pdf_reader("airplaneNoImage.pdf")
-else:
-    with col1:
-        st.write("Please fill in your ID on the sidebar")
-    with col2:
-        st.write("Please fill in your ID on the sidebar")
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = []
+
+    # Display previous messages
+
+    messages_box = st.container(height=600)
+    for message in st.session_state["messages"]:
+        messages_box.chat_message(message["role"]).write(message["content"])
         
+    # User Input
+    user_message = st.chat_input("Ask your question here")
+    if user_message:
+        # Embed user question
+        question_embed = get_embedding_with_retry(user_message, API_URL)
+        similarities = []
+        for chunk_embedding in embeddings:
+            similarity = 1 - cosine(question_embed, chunk_embedding)
+            similarities.append(similarity)
+        top_indices = np.argsort(similarities)[::-1][:5]  # Indices of the top 10 similar chunks
+        
+        # Retrieve the top 10 most similar chunks based on the indices
+        top_10_similar_chunks= [chunks[idx] for idx in top_indices]
+        # top_10_similar_chunks = [expand_to_full_sentence(chunks, idx) for idx in top_indices]
+        retrieved_context = "Answer based on the following context:\n" + "\n\n".join(top_10_similar_chunks)
+
+        # retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
+        st.session_state.messages.append({"role": "user", "content": user_message})
+        if "messages" in st.session_state:  
+            last_message = st.session_state.messages[-1]
+        else:
+            last_message = ''
+        
+        custom_prompt = f"""
+                        You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
+                        Your role is to:
+                        1. Answer questions by the user using the provided retrieved documents.
+                        2. Never generate information beyond what is retrieved from the document.
+                        3. Use information provided by the user
+                        Inputs:
+                        - Retrieved Context: {retrieved_context}
+                        - User Question: {user_message}
+                        - Assitant previous response: {last_message}
+                        Provide a constructive response that is to the point and as concise as possible. Answer only based on the information retrieved from the document and given by the detective.                        
+                    """         
+        response_text = get_model_response(custom_prompt, HF_client_LLM, model_name)
+        st.session_state.messages.append({"role": "RetrievedChunks", "content": retrieved_context})
+        st.session_state.messages.append({"role": "assistant", "content": response_text})
+        # Save to Supabase
+        supabase_client.table("testEnvironment").insert({
+            "session_id": st.session_state.session_id,
+            "Question": user_message,
+            "Answer": response_text,
+            "LLM":model_name
+        }).execute()
+
+        st.rerun()
+with col2:
+    pdf_reader("airplaneNoImage.pdf")
