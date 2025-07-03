@@ -23,6 +23,8 @@ def get_chunks_and_embeddings():
     with open("chunks.pkl", "rb") as f:
         chunks = pickle.load(f)
     embeddings = np.load('embeddings.npy')
+    print(len(embeddings))
+    print(len(embeddings[0]))
     return chunks, embeddings
 
 def query(API_URL, payload):
