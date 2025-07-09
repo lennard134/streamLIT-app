@@ -162,7 +162,7 @@ with col1:
         st.session_state.messages.append({"role": "user", "content": user_message})
         
         if "messages" in st.session_state:  
-            last_message = st.session_state.messages[-1]
+            last_message = st.session_state.messages[-2]
         else:
             last_message = {"content": 'No responses given yet'}
             
