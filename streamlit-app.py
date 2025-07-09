@@ -156,7 +156,7 @@ with col1:
         # Retrieve the top 10 most similar chunks based on the indices
         top_10_similar_chunks= [chunks[idx] for idx in top_indices]
         # top_10_similar_chunks = [expand_to_full_sentence(chunks, idx) for idx in top_indices]
-        retrieved_context = "Answer based on the following context:\n" + "\n\n".join(top_10_similar_chunks)
+        retrieved_context = "Answer is based on the following context:\n\n" + "\n\n".join(top_10_similar_chunks)
 
         # retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
         st.session_state.messages.append({"role": "user", "content": user_message})
@@ -166,15 +166,15 @@ with col1:
         else:
             last_message = {"content": 'No responses given yet'}
             
-        custom_prompt = f"""" You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
+        custom_prompt = f"""" You are a helpful assistant that based on retrieved documents and possibly previous responses returns an answer that fits with the question of the user.
                         Your role is to:
                         1. Answer questions by the user using the provided information.
                         2. Never generate information beyond what is retrieved from the document or provided earlier in the conversation.
                         3. Use information provided by the user or your own previous response.
                         The information to base your answer on:
                         - Retrieved Context: {retrieved_context}
-                        - User Question: {user_message}
                         - Your previous response which can be helpfull in conversations: {last_message["content"]}
+                        - User Question: {user_message}
                         Provide a constructive response that is to the point and as concise as possible. Base your answer only on the information provided.                        
                     """         
         response_text = get_model_response(custom_prompt, HF_client_LLM, model_name)
