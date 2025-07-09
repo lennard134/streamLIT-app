@@ -166,18 +166,19 @@ with col1:
         else:
             last_message = ''
             
-        custom_prompt = f"""
-                        You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
-                        Your role is to:
-                        1. Answer questions by the user using the provided information.
-                        2. Never generate information beyond what is retrieved from the document.
-                        3. Use information provided by the user
-                        The information to base your answer on:
-                        - Retrieved Context: {retrieved_context}
-                        - User Question: {user_message}
-                        - Your previous response to the user: {last_message}
-                        Provide a constructive response that is to the point and as concise as possible. Answer only based on the information provided.                        
-                    """         
+        custom_prompt = f""""You are an assistant that will repeat your previous response
+                                Here is your previous response: {last_message}"""
+                    #     You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
+                    #     Your role is to:
+                    #     1. Answer questions by the user using the provided information.
+                    #     2. Never generate information beyond what is retrieved from the document.
+                    #     3. Use information provided by the user
+                    #     The information to base your answer on:
+                    #     - Retrieved Context: {retrieved_context}
+                    #     - User Question: {user_message}
+                    #     - Your previous response to the user: {last_message}
+                    #     Provide a constructive response that is to the point and as concise as possible. Answer only based on the information provided.                        
+                    # """         
         response_text = get_model_response(custom_prompt, HF_client_LLM, model_name)
         st.session_state.messages.append({"role": "RetrievedChunks", "content": retrieved_context})
         st.session_state.messages.append({"role": "assistant", "content": response_text})
