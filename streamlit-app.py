@@ -173,7 +173,7 @@ with col1:
                         3. Use information provided by the user or your own previous response.
                         The information to base your answer on:
                         - Retrieved Context: {retrieved_context}
-                        - Your previous response which can be helpfull in conversations: {last_message["content"]}
+                        - Helpful assistant's previous response : {last_message["content"]}
                         - User Question: {user_message}
                         Provide a constructive response that is to the point and as concise as possible. Base your answer only on the information provided.                        
                     """         
