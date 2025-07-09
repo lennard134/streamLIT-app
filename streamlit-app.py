@@ -175,7 +175,7 @@ with col1:
                         - Retrieved Context: {retrieved_context}
                         - User Question: {user_message}
                         - Your previous response which can be helpfull in conversations: {last_message["content"]}
-                        Provide a constructive response that is to the point and as concise as possible. Answer only based on the information provided.                        
+                        Provide a constructive response that is to the point and as concise as possible. Base your answer only on the information provided.                        
                     """         
         response_text = get_model_response(custom_prompt, HF_client_LLM, model_name)
         st.session_state.messages.append({"role": "RetrievedChunks", "content": retrieved_context})
