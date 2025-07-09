@@ -169,12 +169,12 @@ with col1:
         custom_prompt = f"""" You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
                         Your role is to:
                         1. Answer questions by the user using the provided information.
-                        2. Never generate information beyond what is retrieved from the document.
-                        3. Use information provided by the user
+                        2. Never generate information beyond what is retrieved from the document or provided earlier in the conversation.
+                        3. Use information provided by the user or your own previous response.
                         The information to base your answer on:
                         - Retrieved Context: {retrieved_context}
                         - User Question: {user_message}
-                        - Your previous response to the user: {last_message["content"]}
+                        - Your previous response which can be helpfull in conversations: {last_message["content"]}
                         Provide a constructive response that is to the point and as concise as possible. Answer only based on the information provided.                        
                     """         
         response_text = get_model_response(custom_prompt, HF_client_LLM, model_name)
