@@ -165,7 +165,7 @@ with col1:
             last_message = st.session_state.messages[-1]
         else:
             last_message = ''
-        messages_box.chat_message("TESTTESTTEST").write(message["content"])
+            
         custom_prompt = f"""
                         You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
                         Your role is to:
