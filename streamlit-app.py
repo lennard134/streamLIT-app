@@ -172,7 +172,7 @@ with col1:
                         1. Answer questions by the user using the provided information.
                         2. Never generate information beyond what is retrieved from the document.
                         3. Use information provided by the user
-                        Inputs:
+                        The information to base your answer on:
                         - Retrieved Context: {retrieved_context}
                         - User Question: {user_message}
                         - Your previous response to the user: {last_message}
