@@ -23,8 +23,6 @@ def get_chunks_and_embeddings():
     with open("chunks.pkl", "rb") as f:
         chunks = pickle.load(f)
     embeddings = np.load('embeddings.npy')
-    print(len(embeddings))
-    print(len(embeddings[0]))
     return chunks, embeddings
 
 def query(API_URL, payload):
@@ -144,7 +142,6 @@ with col1:
     messages_box = st.container(height=600)
     for message in st.session_state["messages"]:
         messages_box.chat_message(message["role"]).write(message["content"])
-        
     # User Input
     user_message = st.chat_input("Ask your question here")
     if user_message:
@@ -167,7 +164,8 @@ with col1:
             last_message = st.session_state.messages[-1]
         else:
             last_message = ''
-        print(last_message)
+        messages_box.write(last_message)
+            
         custom_prompt = f"""
                         You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
                         Your role is to:
