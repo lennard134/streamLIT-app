@@ -164,10 +164,10 @@ with col1:
         if "messages" in st.session_state:  
             last_message = st.session_state.messages[-1]
         else:
-            last_message = ''
+            last_message = {"content": 'No responses given yet'}
             
         custom_prompt = f""""You are an assistant that will repeat your previous response
-                                Here is your previous response: {last_message}"""
+                                Here is your previous response: {last_message["content"]}"""
                     #     You are a helpful assistant that based on retrieved documents returns a response that fits with the question of the user.
                     #     Your role is to:
                     #     1. Answer questions by the user using the provided information.
