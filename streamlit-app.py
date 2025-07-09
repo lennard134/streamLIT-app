@@ -161,7 +161,7 @@ with col1:
         # retrieved_context = ''.join(chunky for chunky in top_10_similar_chunks)
         st.session_state.messages.append({"role": "user", "content": user_message})
         
-        if "messages" in st.session_state:  
+        if "messages" in st.session_state and len(st.session_state.messages) > 1:
             last_message = st.session_state.messages[-2]
         else:
             last_message = {"content": 'No responses given yet'}
