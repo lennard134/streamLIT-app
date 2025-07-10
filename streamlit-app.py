@@ -104,7 +104,7 @@ def get_model_response(user_message, HF_client, model_name, max_retries=5, wait_
 # base_url = "https://router.huggingface.co/novita/v3/openai"   
 
 model_name = "meta-llama/llama-3.1-8b-instruct"
-base_url = "https://router.huggingface.co/novita/v3/openai",
+base_url = "https://router.huggingface.co/novita/v3/openai"
 
 # model_name = "meta-llama/Llama-3.3-70B-Instruct"
 # base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.3-70B-Instruct/v1"
