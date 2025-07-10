@@ -103,11 +103,11 @@ def get_model_response(user_message, HF_client, model_name, max_retries=5, wait_
 # model_name = "meta-llama/llama-3.2-3b-instruct" 
 # base_url = "https://router.huggingface.co/novita/v3/openai"   
 
-model_name = "meta-llama/llama-3.1-8b-instruct"
-base_url = "https://router.huggingface.co/novita/v3/openai"
+# model_name = "meta-llama/llama-3.1-8b-instruct"
+# base_url = "https://router.huggingface.co/novita/v3/openai"
 
-# model_name = "meta-llama/Llama-3.3-70B-Instruct"
-# base_url= "base_url="https://router.huggingface.co/novita/v3/openai"
+model_name = "meta-llama/Llama-3.3-70B-Instruct"
+base_url= "base_url="https://router.huggingface.co/novita/v3/openai"
 
 st.session_state["MODEL_CHOSEN"] = True
     
