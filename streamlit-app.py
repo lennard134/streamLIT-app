@@ -107,7 +107,7 @@ model_name = "meta-llama/llama-3.1-8b-instruct"
 base_url = "https://router.huggingface.co/novita/v3/openai"
 
 # model_name = "meta-llama/Llama-3.3-70B-Instruct"
-# base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.3-70B-Instruct/v1"
+# base_url= "base_url="https://router.huggingface.co/novita/v3/openai"
 
 st.session_state["MODEL_CHOSEN"] = True
     
